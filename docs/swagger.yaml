@@ -1,0 +1,752 @@
+basePath: /
+definitions:
+  github_com_awang-karisma_trustpilot-scraper_internal_api_dto.CreateWebsiteRequest:
+    properties:
+      base_url:
+        type: string
+      enabled:
+        type: boolean
+      name:
+        type: string
+      schedule:
+        type: string
+    required:
+    - base_url
+    - name
+    - schedule
+    type: object
+  github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ErrorResponse:
+    properties:
+      error:
+        type: string
+    type: object
+  github_com_awang-karisma_trustpilot-scraper_internal_api_dto.JobListResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.JobResponse'
+        type: array
+      total:
+        type: integer
+    type: object
+  github_com_awang-karisma_trustpilot-scraper_internal_api_dto.JobResponse:
+    properties:
+      completed_at:
+        type: string
+      created_at:
+        type: string
+      error:
+        type: string
+      id:
+        type: integer
+      reviews_found:
+        type: integer
+      started_at:
+        type: string
+      status:
+        type: string
+      website_id:
+        type: integer
+      website_name:
+        type: string
+    type: object
+  github_com_awang-karisma_trustpilot-scraper_internal_api_dto.JobStats:
+    properties:
+      completed_today:
+        type: integer
+      failed_today:
+        type: integer
+      pending:
+        type: integer
+      running:
+        type: integer
+    type: object
+  github_com_awang-karisma_trustpilot-scraper_internal_api_dto.Pagination:
+    properties:
+      limit:
+        type: integer
+      page:
+        type: integer
+      total:
+        type: integer
+      total_pages:
+        type: integer
+    type: object
+  github_com_awang-karisma_trustpilot-scraper_internal_api_dto.QueueStats:
+    properties:
+      size:
+        type: integer
+      workers_active:
+        type: integer
+    type: object
+  github_com_awang-karisma_trustpilot-scraper_internal_api_dto.RatingHistoryResponse:
+    properties:
+      current:
+        $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.RatingSnapshot'
+      history:
+        items:
+          $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.RatingSnapshot'
+        type: array
+      website_id:
+        type: integer
+      website_name:
+        type: string
+    type: object
+  github_com_awang-karisma_trustpilot-scraper_internal_api_dto.RatingSnapshot:
+    properties:
+      count:
+        type: integer
+      created_at:
+        type: string
+      rating:
+        type: number
+    type: object
+  github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ReviewListResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ReviewResponse'
+        type: array
+      pagination:
+        $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.Pagination'
+    type: object
+  github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ReviewResponse:
+    properties:
+      content:
+        type: string
+      created_at:
+        type: string
+      date:
+        type: string
+      id:
+        type: integer
+      rating:
+        type: integer
+      review_id:
+        type: string
+      reviewer:
+        type: string
+      title:
+        type: string
+      website_id:
+        type: integer
+      website_name:
+        type: string
+    type: object
+  github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ReviewStats:
+    properties:
+      bad_reviews:
+        description: 1-2 star reviews
+        type: integer
+      this_week:
+        type: integer
+      total:
+        type: integer
+    type: object
+  github_com_awang-karisma_trustpilot-scraper_internal_api_dto.StatsResponse:
+    properties:
+      jobs:
+        $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.JobStats'
+      queue:
+        $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.QueueStats'
+      reviews:
+        $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ReviewStats'
+      websites:
+        $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.WebsiteStats'
+    type: object
+  github_com_awang-karisma_trustpilot-scraper_internal_api_dto.SuccessResponse:
+    properties:
+      message:
+        type: string
+      success:
+        type: boolean
+    type: object
+  github_com_awang-karisma_trustpilot-scraper_internal_api_dto.UpdateWebsiteRequest:
+    properties:
+      base_url:
+        type: string
+      enabled:
+        type: boolean
+      name:
+        minLength: 1
+        type: string
+      schedule:
+        type: string
+    type: object
+  github_com_awang-karisma_trustpilot-scraper_internal_api_dto.WebhookTestRequest:
+    properties:
+      template_path:
+        type: string
+      webhook_type:
+        type: string
+      webhook_url:
+        type: string
+    required:
+    - webhook_url
+    type: object
+  github_com_awang-karisma_trustpilot-scraper_internal_api_dto.WebhookTestResponse:
+    properties:
+      message:
+        type: string
+      response_status:
+        type: integer
+      success:
+        type: boolean
+    type: object
+  github_com_awang-karisma_trustpilot-scraper_internal_api_dto.WebhookTriggerRequest:
+    properties:
+      review_id:
+        description: 'Optional: specific review to send'
+        type: integer
+    type: object
+  github_com_awang-karisma_trustpilot-scraper_internal_api_dto.WebhookTriggerResponse:
+    properties:
+      message:
+        type: string
+      sent_at:
+        type: string
+      success:
+        type: boolean
+    type: object
+  github_com_awang-karisma_trustpilot-scraper_internal_api_dto.WebsiteListResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.WebsiteResponse'
+        type: array
+      total:
+        type: integer
+    type: object
+  github_com_awang-karisma_trustpilot-scraper_internal_api_dto.WebsiteResponse:
+    properties:
+      base_url:
+        type: string
+      created_at:
+        type: string
+      enabled:
+        type: boolean
+      id:
+        type: integer
+      last_scraped:
+        type: string
+      name:
+        type: string
+      schedule:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  github_com_awang-karisma_trustpilot-scraper_internal_api_dto.WebsiteStats:
+    properties:
+      disabled:
+        type: integer
+      enabled:
+        type: integer
+      total:
+        type: integer
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@example.com
+    name: API Support
+  description: This is a Trustpilot Scraper API server.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Trustpilot Scraper API
+  version: "1.0"
+paths:
+  /api/jobs:
+    get:
+      description: Get jobs with optional filters
+      parameters:
+      - description: Filter by status (pending, running, completed, failed)
+        in: query
+        name: status
+        type: string
+      - description: Filter by website ID
+        in: query
+        name: website_id
+        type: integer
+      - default: 50
+        description: Number of results
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.JobListResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ErrorResponse'
+      summary: List jobs
+      tags:
+      - jobs
+  /api/jobs/{id}:
+    get:
+      description: Get a job by ID
+      parameters:
+      - description: Job ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.JobResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ErrorResponse'
+      summary: Get a job
+      tags:
+      - jobs
+  /api/reviews:
+    get:
+      description: Get paginated reviews with optional filters
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: Items per page
+        in: query
+        name: limit
+        type: integer
+      - description: Filter by website ID
+        in: query
+        name: website_id
+        type: integer
+      - description: Filter by rating (comma-separated, e.g., 1,2,3)
+        in: query
+        name: rating
+        type: string
+      - default: date desc
+        description: Sort order (e.g., date desc, rating asc)
+        in: query
+        name: sort
+        type: string
+      - description: Search in title and content
+        in: query
+        name: search
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ReviewListResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ErrorResponse'
+      summary: List reviews
+      tags:
+      - reviews
+  /api/reviews/{id}:
+    get:
+      description: Get a review by ID
+      parameters:
+      - description: Review ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ReviewResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ErrorResponse'
+      summary: Get a review
+      tags:
+      - reviews
+  /api/stats:
+    get:
+      description: Get overall service statistics including websites, reviews, jobs,
+        and queue
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.StatsResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ErrorResponse'
+      summary: Get service statistics
+      tags:
+      - stats
+  /api/webhook/test:
+    post:
+      consumes:
+      - application/json
+      description: Test a webhook configuration with mock data
+      parameters:
+      - description: Webhook test configuration
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.WebhookTestRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.WebhookTestResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ErrorResponse'
+      summary: Test a webhook
+      tags:
+      - webhooks
+  /api/websites:
+    get:
+      description: Get a list of all registered websites to scrape
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.WebsiteListResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ErrorResponse'
+      summary: List all websites
+      tags:
+      - websites
+    post:
+      consumes:
+      - application/json
+      description: Register a new website for scraping
+      parameters:
+      - description: Website details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.CreateWebsiteRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.WebsiteResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ErrorResponse'
+      summary: Create a new website
+      tags:
+      - websites
+  /api/websites/{id}:
+    delete:
+      description: Delete a registered website by ID
+      parameters:
+      - description: Website ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ErrorResponse'
+      summary: Delete a website
+      tags:
+      - websites
+    get:
+      description: Get a registered website by ID
+      parameters:
+      - description: Website ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.WebsiteResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ErrorResponse'
+      summary: Get a website
+      tags:
+      - websites
+    put:
+      consumes:
+      - application/json
+      description: Update registered website details by ID
+      parameters:
+      - description: Website ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Website details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.UpdateWebsiteRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.WebsiteResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ErrorResponse'
+      summary: Update a website
+      tags:
+      - websites
+  /api/websites/{id}/ratings:
+    get:
+      description: Get rating history for a website
+      parameters:
+      - description: Website ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Start date (YYYY-MM-DD)
+        in: query
+        name: from
+        type: string
+      - description: End date (YYYY-MM-DD)
+        in: query
+        name: to
+        type: string
+      - default: 30
+        description: Number of records
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.RatingHistoryResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ErrorResponse'
+      summary: Get rating history
+      tags:
+      - ratings
+  /api/websites/{id}/reviews:
+    get:
+      description: Get paginated reviews for a specific website
+      parameters:
+      - description: Website ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: Items per page
+        in: query
+        name: limit
+        type: integer
+      - description: Filter by rating (comma-separated)
+        in: query
+        name: rating
+        type: string
+      - default: date desc
+        description: Sort order
+        in: query
+        name: sort
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ReviewListResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ErrorResponse'
+      summary: List reviews by website
+      tags:
+      - reviews
+  /api/websites/{id}/scrape:
+    post:
+      description: Manually trigger an immediate scraping job for a website
+      parameters:
+      - description: Website ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ErrorResponse'
+      summary: Trigger a scrape
+      tags:
+      - websites
+  /api/websites/{id}/webhook:
+    post:
+      consumes:
+      - application/json
+      description: Manually trigger a webhook for a specific website
+      parameters:
+      - description: Website ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Webhook trigger options
+        in: body
+        name: request
+        schema:
+          $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.WebhookTriggerRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.WebhookTriggerResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ErrorResponse'
+      summary: Trigger a webhook
+      tags:
+      - webhooks
+swagger: "2.0"

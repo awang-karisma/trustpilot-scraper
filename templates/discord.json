@@ -1,0 +1,30 @@
+{
+  "content": "✅ **Trustpilot Scraper Success Run**",
+  "embeds": [
+    {
+      "title": "{{.Website | json}} - {{.TotalRating}} / 5",
+      "description": "Total Reviews: {{.TotalCount}}\n\n**Worst Review of the Day:**\n{{if .Reviewer}}*{{.Title | json}}*\\n{{.Content | json}}{{else}}No reviews found for today yet.{{end}}",
+      "color": 3447003,
+      "fields": [
+        {
+          "name": "Reviewer",
+          "value": "{{if .Reviewer}}{{.Reviewer | json}}{{else}}N/A{{end}}",
+          "inline": true
+        },
+        {
+          "name": "Rating",
+          "value": "{{if .Reviewer}}{{.Rating}} / 5{{else}}N/A{{end}}",
+          "inline": true
+        },
+        {
+          "name": "Date",
+          "value": "{{if .Reviewer}}{{.Date}}{{else}}N/A{{end}}",
+          "inline": true
+        }
+      ],
+      "footer": {
+        "text": "Scraper run completed successfully"
+      }
+    }
+  ]
+}

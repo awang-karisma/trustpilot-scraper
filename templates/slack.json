@@ -1,0 +1,3 @@
+{
+  "text": "✅ *Trustpilot Scraper Success Run*\n*{{.Website | json}}*: {{.TotalRating}} / 5 ({{.TotalCount}} reviews)\n\n*Worst Review of the Day:*\n{{if .Reviewer}}*{{.Title | json}}* ({{.Rating}} / 5)\n{{.Content | json}}\n_By {{.Reviewer | json}} on {{.Date}}_{{else}}No reviews found for today yet.{{end}}"
+}
