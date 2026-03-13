@@ -15,6 +15,7 @@ import (
 	"github.com/awang-karisma/trustpilot-scraper/internal/queue"
 	"github.com/awang-karisma/trustpilot-scraper/internal/scheduler"
 	"github.com/awang-karisma/trustpilot-scraper/internal/webhook"
+	"github.com/awang-karisma/trustpilot-scraper/internal/website"
 	"github.com/awang-karisma/trustpilot-scraper/internal/worker"
 
 	_ "github.com/awang-karisma/trustpilot-scraper/docs" // Import docs for Swaggo
@@ -60,7 +61,24 @@ func main() {
 	}
 	logger.Info("Database connected")
 
-	// 3. Initialize queue
+	// 3. Initialize database (auto-migration)
+	initManager := database.NewInitManager(db, logger)
+	if err := initManager.AutoMigrate(); err != nil {
+		logger.Error("Failed to run auto-migration", "error", err)
+		os.Exit(1)
+	}
+	logger.Info("Database migration completed")
+
+	// 4. Initialize websites from environment variables
+	// This will only add websites if they don't exist in the database
+	websiteManager := website.NewManager(db, logger)
+	if err := websiteManager.InitializeFromEnv(cfg.TrustpilotURL, cfg.DefaultSchedule); err != nil {
+		logger.Error("Failed to initialize websites from environment", "error", err)
+		// Continue anyway - websites can be added via API
+		logger.Warn("Continuing without website initialization")
+	}
+
+	// 5. Initialize queue
 	q := queue.NewMemoryQueue()
 	logger.Info("Queue initialized", "queue_size", cfg.QueueSize)
 
@@ -94,13 +112,52 @@ func main() {
 		cancel()
 	}
 
-	// Start API server (in goroutine)
-	apiErrors := make(chan error, 1)
-	go func() {
-		if err := server.Start(); err != nil && err != http.ErrServerClosed {
-			apiErrors <- err
+	// Start API server if enabled
+	var apiErrors chan error
+	if cfg.APIEnabled {
+		apiErrors = make(chan error, 1)
+		go func() {
+			if err := server.Start(); err != nil && err != http.ErrServerClosed {
+				apiErrors <- err
+			}
+		}()
+	} else {
+		logger.Info("API server disabled by configuration")
+		apiErrors = nil
+	}
+
+	logger.Info("Service started",
+		"workers", cfg.WorkerCount,
+		"api_port", cfg.APIPort,
+		"api_enabled", cfg.APIEnabled,
+	)
+
+	// 9. Wait for shutdown signal or API error
+	if cfg.APIEnabled {
+		select {
+		case <-ctx.Done():
+			logger.Info("Shutdown signal received")
+		case err := <-apiErrors:
+			logger.Error("API server error", "error", err)
+			cancel()
 		}
-	}()
+	} else {
+		// Only wait for shutdown signal if API is disabled
+		<-ctx.Done()
+		logger.Info("Shutdown signal received")
+	}
+
+	// Start API server (if enabled)
+	if cfg.APIEnabled {
+		apiErrors := make(chan error, 1)
+		go func() {
+			if err := server.Start(); err != nil && err != http.ErrServerClosed {
+				apiErrors <- err
+			}
+		}()
+	} else {
+		logger.Info("API server disabled by configuration")
+	}
 
 	logger.Info("Service started",
 		"workers", cfg.WorkerCount,

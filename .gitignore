@@ -1,5 +1,6 @@
 /.tmp
 /.plan
+/bin
 .env
 .env.*
 !.env.example

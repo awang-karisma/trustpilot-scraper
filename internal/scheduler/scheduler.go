@@ -1,6 +1,7 @@
 package scheduler
 
 import (
+	"fmt"
 	"log/slog"
 	"sync"
 	"time"
@@ -42,14 +43,37 @@ func NewScheduler(db *gorm.DB, q queue.Queue, cfg *config.ServiceConfig, logger 
 func (s *Scheduler) Start() error {
 	s.logger.Info("Starting scheduler")
 
+	// Check if website table is empty
+	var count int64
+	if err := s.db.Model(&database.Website{}).Count(&count).Error; err != nil {
+		return fmt.Errorf("failed to count websites: %w", err)
+	}
+
+	if count == 0 {
+		s.logger.Info("No websites in database, scheduler will not run any jobs")
+		// Start cron anyway to keep scheduler running
+		s.cron.Start()
+		s.logger.Info("Scheduler started with no websites")
+		return nil
+	}
+
 	// Load all enabled websites and schedule them
 	var websites []database.Website
 	if err := s.db.Where("enabled = ?", true).Find(&websites).Error; err != nil {
 		return err
 	}
 
+	if len(websites) == 0 {
+		s.logger.Info("No enabled websites found, scheduler will not run any jobs")
+		s.cron.Start()
+		s.logger.Info("Scheduler started with no enabled websites")
+		return nil
+	}
+
 	for _, website := range websites {
-		s.ScheduleWebsite(website)
+		if err := s.ScheduleWebsite(website); err != nil {
+			s.logger.Error("Failed to schedule website", "website_id", website.ID, "error", err)
+		}
 	}
 
 	// Start cron

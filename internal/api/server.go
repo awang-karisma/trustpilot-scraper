@@ -43,7 +43,9 @@ func NewServer(cfg *config.ServiceConfig, db *gorm.DB, sched *scheduler.Schedule
 	}))
 
 	// Swagger documentation
-	app.Get("/swagger/*", swagger.New())
+	app.Get("/swagger/*", swagger.New(swagger.Config{
+		FilePath: "./docs/swagger.json",
+	}))
 
 	s := &Server{
 		app:       app,

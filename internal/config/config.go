@@ -18,11 +18,14 @@ type Config struct {
 
 // ServiceConfig holds configuration for the always-running service
 type ServiceConfig struct {
+	// Trustpilot URL(s) for initial website setup
+	TrustpilotURL string `mapstructure:"TRUSTPILOT_URL"` // Can be multiple URLs separated by semicolon
+
 	// Database
 	DatabaseURL string `mapstructure:"DATABASE_URL"`
 
 	// Scheduler
-	DefaultSchedule string `mapstructure:"DEFAULT_SCHEDULE"` // e.g., "*/30 * * * *"
+	DefaultSchedule string `mapstructure:"DEFAULT_SCHEDULE"` // e.g., "0 * * * *" (hourly)
 
 	// Worker Pool
 	WorkerCount      int `mapstructure:"WORKER_COUNT"`   // default: 3
@@ -102,7 +105,7 @@ func LoadServiceConfig() (*ServiceConfig, error) {
 
 	// Default values
 	viper.SetDefault("DATABASE_URL", "postgres://postgres:postgres@localhost:5432/trustpilot?sslmode=disable")
-	viper.SetDefault("DEFAULT_SCHEDULE", "*/30 * * * *")
+	viper.SetDefault("DEFAULT_SCHEDULE", "0 * * * *") // Hourly by default
 	viper.SetDefault("WORKER_COUNT", 3)
 	viper.SetDefault("QUEUE_SIZE", 100)
 	viper.SetDefault("SCRAPE_TIMEOUT", 120)
@@ -116,6 +119,7 @@ func LoadServiceConfig() (*ServiceConfig, error) {
 	viper.SetDefault("SHUTDOWN_TIMEOUT", 30)
 
 	// Bind env vars
+	viper.BindEnv("TRUSTPILOT_URL")
 	viper.BindEnv("DATABASE_URL")
 	viper.BindEnv("DEFAULT_SCHEDULE")
 	viper.BindEnv("WORKER_COUNT")
