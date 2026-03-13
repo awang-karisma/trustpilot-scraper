@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"log/slog"
 	"strings"
+	"sync"
 	"time"
 
+	"golang.org/x/sync/errgroup"
 	"gorm.io/gorm"
 
 	"github.com/awang-karisma/trustpilot-scraper/internal/config"
@@ -104,25 +106,48 @@ func (w *Worker) processJob(ctx context.Context, job *queue.Job) {
 	// 	w.scraper = scraper.NewScraper("")
 	// }
 
-	// Build URL for bad reviews
-	badReviewsURL := w.buildBadReviewsURL(website.BaseURL)
+	// Determine max pages to scrape (default to 1 if not set)
+	maxPages := website.MaxPages
+	if maxPages <= 0 {
+		maxPages = 1
+	}
 
 	// Create timeout context for scraping
 	scrapeTimeout := time.Duration(w.config.ScrapeTimeoutSec) * time.Second
 	scrapeCtx, cancel := context.WithTimeout(ctx, scrapeTimeout)
 	defer cancel()
 
-	// Scrape
-	result, err := w.scraper.ScrapeWithContext(scrapeCtx, badReviewsURL)
-	if err != nil {
-		w.failJob(&scrapeJob, job, fmt.Sprintf("Scraping failed: %v", err))
-		return
+	// Scrape pages in parallel
+	var allReviews []database.Review
+	var summary database.Summary
+	var err error
+
+	if maxPages == 1 {
+		// Single page scraping (backward compatible)
+		badReviewsURL := w.buildBadReviewsURL(website.BaseURL, 1)
+		result, scrapeErr := w.scraper.ScrapeWithContext(scrapeCtx, badReviewsURL)
+		if scrapeErr != nil {
+			w.failJob(&scrapeJob, job, fmt.Sprintf("Scraping failed: %v", scrapeErr))
+			return
+		}
+		allReviews = result.Reviews
+		summary = result.Summary
+	} else {
+		// Parallel multi-page scraping
+		allReviews, summary, err = w.scrapePagesParallel(scrapeCtx, website.BaseURL, maxPages)
+		if err != nil {
+			w.failJob(&scrapeJob, job, fmt.Sprintf("Scraping failed: %v", err))
+			return
+		}
 	}
 
 	// Save results
-	reviewsSaved, err := w.saveResults(website, result)
-	if err != nil {
-		w.failJob(&scrapeJob, job, fmt.Sprintf("Failed to save results: %v", err))
+	reviewsSaved, saveErr := w.saveResults(website, &scraper.ScrapeResult{
+		Summary: summary,
+		Reviews: allReviews,
+	})
+	if saveErr != nil {
+		w.failJob(&scrapeJob, job, fmt.Sprintf("Failed to save results: %v", saveErr))
 		return
 	}
 
@@ -147,15 +172,19 @@ func (w *Worker) processJob(ctx context.Context, job *queue.Job) {
 }
 
 // buildBadReviewsURL constructs the URL for fetching bad reviews
-func (w *Worker) buildBadReviewsURL(baseURL string) string {
+func (w *Worker) buildBadReviewsURL(baseURL string, page int) string {
 	// Extract website name from base URL
 	// e.g., "https://example.com" -> "example.com"
 	website := strings.TrimPrefix(baseURL, "https://")
 	website = strings.TrimPrefix(website, "http://")
 	website = strings.TrimSuffix(website, "/")
 
-	// Build Trustpilot URL for bad reviews
-	return fmt.Sprintf("https://www.trustpilot.com/review/%s?stars=1&stars=2", website)
+	// Build Trustpilot URL for bad reviews with pagination
+	// Trustpilot uses page parameter for pagination
+	if page <= 1 {
+		return fmt.Sprintf("https://www.trustpilot.com/review/%s?stars=1&stars=2", website)
+	}
+	return fmt.Sprintf("https://www.trustpilot.com/review/%s?stars=1&stars=2&page=%d", website, page)
 }
 
 // saveResults saves scraped reviews and rating to database
@@ -203,6 +232,53 @@ func (w *Worker) saveResults(website database.Website, result *scraper.ScrapeRes
 	}
 
 	return savedCount, nil
+}
+
+// scrapePagesParallel scrapes multiple pages in parallel using goroutines
+func (w *Worker) scrapePagesParallel(ctx context.Context, baseURL string, maxPages int) ([]database.Review, database.Summary, error) {
+	var allReviews []database.Review
+	var mu sync.Mutex
+	var summary database.Summary
+
+	g, ctx := errgroup.WithContext(ctx)
+
+	// Launch a goroutine for each page
+	for page := 1; page <= maxPages; page++ {
+		page := page // Capture for goroutine
+		g.Go(func() error {
+			// Each goroutine gets its own scraper/browser instance
+			pageScraper := scraper.NewScraper("")
+			pageURL := w.buildBadReviewsURL(baseURL, page)
+
+			w.logger.Info("Scraping page", "page", page, "url", pageURL)
+
+			result, err := pageScraper.ScrapeWithContext(ctx, pageURL)
+			if err != nil {
+				w.logger.Error("Failed to scrape page", "page", page, "error", err)
+				return err
+			}
+
+			// Collect results safely
+			mu.Lock()
+			allReviews = append(allReviews, result.Reviews...)
+			// Use summary from first page
+			if page == 1 {
+				summary = result.Summary
+			}
+			mu.Unlock()
+
+			w.logger.Info("Scraped page successfully", "page", page, "reviews", len(result.Reviews))
+			return nil
+		})
+	}
+
+	// Wait for all goroutines to complete
+	if err := g.Wait(); err != nil {
+		return nil, database.Summary{}, err
+	}
+
+	w.logger.Info("Parallel scraping completed", "total_pages", maxPages, "total_reviews", len(allReviews))
+	return allReviews, summary, nil
 }
 
 // failJob marks a job as failed and optionally requeues it

@@ -29,7 +29,6 @@ import (
 // @contact.email support@example.com
 // @license.name Apache 2.0
 // @license.url http://www.apache.org/licenses/LICENSE-2.0.html
-// @host localhost:8080
 // @BasePath /
 
 func main() {
@@ -63,6 +62,17 @@ func main() {
 
 	// 3. Initialize database (auto-migration)
 	initManager := database.NewInitManager(db, logger)
+
+	// Check if we should drop tables first (safety feature)
+	if cfg.DropTablesOnStart {
+		logger.Warn("DROP_TABLES_ON_START is enabled, dropping all existing tables")
+		if err := initManager.DropAllTables(); err != nil {
+			logger.Error("Failed to drop tables", "error", err)
+			os.Exit(1)
+		}
+	}
+
+	// Run auto-migration
 	if err := initManager.AutoMigrate(); err != nil {
 		logger.Error("Failed to run auto-migration", "error", err)
 		os.Exit(1)

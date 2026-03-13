@@ -21,6 +21,28 @@ func NewInitManager(db *gorm.DB, logger *slog.Logger) *InitManager {
 	}
 }
 
+// DropAllTables drops all tables for clean migration
+func (m *InitManager) DropAllTables() error {
+	m.logger.Info("Dropping all tables for clean migration")
+
+	tables := []interface{}{
+		&Website{},
+		&Review{},
+		&WebsiteRating{},
+		&ScrapeJob{},
+		&Summary{},
+	}
+
+	for _, table := range tables {
+		if err := m.db.Migrator().DropTable(table); err != nil {
+			return fmt.Errorf("failed to drop table %T: %w", table, err)
+		}
+	}
+
+	m.logger.Info("All tables dropped successfully")
+	return nil
+}
+
 // AutoMigrate performs automatic migration without SQL files
 func (m *InitManager) AutoMigrate() error {
 	m.logger.Info("Starting automatic migration")

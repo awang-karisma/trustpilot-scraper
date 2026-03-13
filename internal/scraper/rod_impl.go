@@ -98,10 +98,17 @@ func (r *Scraper) Scrape() (*ScrapeResult, error) {
 		for _, card := range reviewCards {
 			review := database.Review{}
 
-			// Review ID
-			id, _ := card.Attribute("id")
-			if id != nil {
-				review.ReviewID = *id
+			// Review ID - extract from review link href
+			reviewLinkEl, err := card.Element("a[href*='/reviews/']")
+			if err == nil {
+				href, _ := reviewLinkEl.Attribute("href")
+				if href != nil {
+					// Extract ID from href like "/reviews/6879f42d7634eaeb833df2ff"
+					parts := strings.Split(*href, "/reviews/")
+					if len(parts) > 1 {
+						review.ReviewID = parts[1]
+					}
+				}
 			}
 
 			// Reviewer
@@ -111,13 +118,13 @@ func (r *Scraper) Scrape() (*ScrapeResult, error) {
 			}
 
 			// Title
-			titleEl, err := card.Element("h2")
+			titleEl, err := card.Element("h2[data-service-review-title-typography='true']")
 			if err == nil {
 				review.Title, _ = titleEl.Text()
 			}
 
 			// Content
-			contentEl, err := card.Element("div[class*='review-content'], div[data-testid='review-body'] p")
+			contentEl, err := card.Element("p[data-service-review-text-typography='true']")
 			if err == nil {
 				review.Content, _ = contentEl.Text()
 			}
@@ -127,9 +134,11 @@ func (r *Scraper) Scrape() (*ScrapeResult, error) {
 			if err == nil {
 				alt, _ := ratingImg.Attribute("alt")
 				if alt != nil && strings.Contains(*alt, "out of 5") {
+					// Alt text format: "Rated 1 out of 5 stars"
+					// We need to extract the number after "Rated"
 					parts := strings.Split(*alt, " ")
-					if len(parts) > 0 {
-						r, err := strconv.Atoi(parts[0])
+					if len(parts) >= 2 {
+						r, err := strconv.Atoi(parts[1]) // Second part is the rating number
 						if err == nil {
 							review.Rating = r
 						}
@@ -282,10 +291,17 @@ func (r *Scraper) ScrapeWithContext(ctx context.Context, url string) (*ScrapeRes
 
 			review := database.Review{}
 
-			// Review ID
-			id, _ := card.Attribute("id")
-			if id != nil {
-				review.ReviewID = *id
+			// Review ID - extract from review link href
+			reviewLinkEl, err := card.Element("a[href*='/reviews/']")
+			if err == nil {
+				href, _ := reviewLinkEl.Attribute("href")
+				if href != nil {
+					// Extract ID from href like "/reviews/6879f42d7634eaeb833df2ff"
+					parts := strings.Split(*href, "/reviews/")
+					if len(parts) > 1 {
+						review.ReviewID = parts[1]
+					}
+				}
 			}
 
 			// Reviewer
@@ -295,13 +311,13 @@ func (r *Scraper) ScrapeWithContext(ctx context.Context, url string) (*ScrapeRes
 			}
 
 			// Title
-			titleEl, err := card.Element("h2")
+			titleEl, err := card.Element("h2[data-service-review-title-typography='true']")
 			if err == nil {
 				review.Title, _ = titleEl.Text()
 			}
 
 			// Content
-			contentEl, err := card.Element("div[class*='review-content'], div[data-testid='review-body'] p")
+			contentEl, err := card.Element("p[data-service-review-text-typography='true']")
 			if err == nil {
 				review.Content, _ = contentEl.Text()
 			}
@@ -311,9 +327,11 @@ func (r *Scraper) ScrapeWithContext(ctx context.Context, url string) (*ScrapeRes
 			if err == nil {
 				alt, _ := ratingImg.Attribute("alt")
 				if alt != nil && strings.Contains(*alt, "out of 5") {
+					// Alt text format: "Rated 1 out of 5 stars"
+					// We need to extract the number after "Rated"
 					parts := strings.Split(*alt, " ")
-					if len(parts) > 0 {
-						r, err := strconv.Atoi(parts[0])
+					if len(parts) >= 2 {
+						r, err := strconv.Atoi(parts[1]) // Second part is the rating number
 						if err == nil {
 							review.Rating = r
 						}

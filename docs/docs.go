@@ -778,6 +778,11 @@ const docTemplate = `{
                 "enabled": {
                     "type": "boolean"
                 },
+                "max_pages": {
+                    "type": "integer",
+                    "maximum": 50,
+                    "minimum": 1
+                },
                 "name": {
                     "type": "string"
                 },
@@ -1020,6 +1025,11 @@ const docTemplate = `{
                 "enabled": {
                     "type": "boolean"
                 },
+                "max_pages": {
+                    "type": "integer",
+                    "maximum": 50,
+                    "minimum": 1
+                },
                 "name": {
                     "type": "string",
                     "minLength": 1
@@ -1115,6 +1125,9 @@ const docTemplate = `{
                 "last_scraped": {
                     "type": "string"
                 },
+                "max_pages": {
+                    "type": "integer"
+                },
                 "name": {
                     "type": "string"
                 },
@@ -1146,7 +1159,7 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "localhost:8080",
+	Host:             "",
 	BasePath:         "/",
 	Schemes:          []string{},
 	Title:            "Trustpilot Scraper API",

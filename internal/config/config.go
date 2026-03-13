@@ -21,6 +21,9 @@ type ServiceConfig struct {
 	// Trustpilot URL(s) for initial website setup
 	TrustpilotURL string `mapstructure:"TRUSTPILOT_URL"` // Can be multiple URLs separated by semicolon
 
+	// Migration
+	DropTablesOnStart bool `mapstructure:"DROP_TABLES_ON_START"` // Safety flag for dropping tables on startup
+
 	// Database
 	DatabaseURL string `mapstructure:"DATABASE_URL"`
 
@@ -106,6 +109,7 @@ func LoadServiceConfig() (*ServiceConfig, error) {
 	// Default values
 	viper.SetDefault("DATABASE_URL", "postgres://postgres:postgres@localhost:5432/trustpilot?sslmode=disable")
 	viper.SetDefault("DEFAULT_SCHEDULE", "0 * * * *") // Hourly by default
+	viper.SetDefault("DROP_TABLES_ON_START", false)   // Safety: don't drop tables by default
 	viper.SetDefault("WORKER_COUNT", 3)
 	viper.SetDefault("QUEUE_SIZE", 100)
 	viper.SetDefault("SCRAPE_TIMEOUT", 120)
@@ -120,6 +124,7 @@ func LoadServiceConfig() (*ServiceConfig, error) {
 
 	// Bind env vars
 	viper.BindEnv("TRUSTPILOT_URL")
+	viper.BindEnv("DROP_TABLES_ON_START")
 	viper.BindEnv("DATABASE_URL")
 	viper.BindEnv("DEFAULT_SCHEDULE")
 	viper.BindEnv("WORKER_COUNT")

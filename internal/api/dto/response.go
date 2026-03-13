@@ -32,6 +32,7 @@ type WebsiteResponse struct {
 	BaseURL     string     `json:"base_url"`
 	Schedule    string     `json:"schedule"`
 	Enabled     bool       `json:"enabled"`
+	MaxPages    int        `json:"max_pages"`
 	LastScraped *time.Time `json:"last_scraped,omitempty"`
 	CreatedAt   time.Time  `json:"created_at"`
 	UpdatedAt   time.Time  `json:"updated_at"`
@@ -49,6 +50,7 @@ func ToWebsiteResponse(w database.Website) WebsiteResponse {
 		BaseURL:     w.BaseURL,
 		Schedule:    w.Schedule,
 		Enabled:     w.Enabled,
+		MaxPages:    w.MaxPages,
 		LastScraped: w.LastScraped,
 		CreatedAt:   w.CreatedAt,
 		UpdatedAt:   w.UpdatedAt,

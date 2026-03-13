@@ -16,11 +16,5 @@ func Connect(dsn string) (*gorm.DB, error) {
 		return nil, fmt.Errorf("failed to connect to database: %w", err)
 	}
 
-	// Auto-migrate
-	err = db.AutoMigrate(&Website{}, &Review{}, &WebsiteRating{}, &ScrapeJob{}, &Summary{})
-	if err != nil {
-		return nil, fmt.Errorf("failed to auto-migrate database: %w", err)
-	}
-
 	return db, nil
 }

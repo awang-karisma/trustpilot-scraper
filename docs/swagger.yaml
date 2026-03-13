@@ -6,6 +6,10 @@ definitions:
         type: string
       enabled:
         type: boolean
+      max_pages:
+        maximum: 50
+        minimum: 1
+        type: integer
       name:
         type: string
       schedule:
@@ -167,6 +171,10 @@ definitions:
         type: string
       enabled:
         type: boolean
+      max_pages:
+        maximum: 50
+        minimum: 1
+        type: integer
       name:
         minLength: 1
         type: string
@@ -229,6 +237,8 @@ definitions:
         type: integer
       last_scraped:
         type: string
+      max_pages:
+        type: integer
       name:
         type: string
       schedule:
@@ -245,7 +255,6 @@ definitions:
       total:
         type: integer
     type: object
-host: localhost:8080
 info:
   contact:
     email: support@example.com

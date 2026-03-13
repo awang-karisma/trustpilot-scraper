@@ -9,6 +9,7 @@ type CreateWebsiteRequest struct {
 	BaseURL  string `json:"base_url" validate:"required,url"`
 	Schedule string `json:"schedule" validate:"required"`
 	Enabled  bool   `json:"enabled"`
+	MaxPages int    `json:"max_pages" validate:"omitempty,min=1,max=50"`
 }
 
 type UpdateWebsiteRequest struct {
@@ -16,6 +17,7 @@ type UpdateWebsiteRequest struct {
 	BaseURL  *string `json:"base_url,omitempty" validate:"omitempty,url"`
 	Schedule *string `json:"schedule,omitempty" validate:"omitempty"`
 	Enabled  *bool   `json:"enabled,omitempty"`
+	MaxPages *int    `json:"max_pages,omitempty" validate:"omitempty,min=1,max=50"`
 }
 
 // Review requests

@@ -13,6 +13,7 @@ type Website struct {
 	BaseURL     string     `gorm:"uniqueIndex;not null" json:"base_url"` // e.g., "https://example.com"
 	Schedule    string     `gorm:"not null" json:"schedule"`             // Cron expression, e.g., "0 * * * *" (hourly)
 	Enabled     bool       `gorm:"default:true" json:"enabled"`          // Whether scraping is enabled
+	MaxPages    int        `gorm:"default:1" json:"max_pages"`           // Number of pages to scrape (default: 1)
 	LastScraped *time.Time `json:"last_scraped,omitempty"`               // Last successful scrape time
 	CreatedAt   time.Time  `json:"created_at"`
 	UpdatedAt   time.Time  `json:"updated_at"`

@@ -14,7 +14,6 @@
         },
         "version": "1.0"
     },
-    "host": "localhost:8080",
     "basePath": "/",
     "paths": {
         "/api/jobs": {
@@ -772,6 +771,11 @@
                 "enabled": {
                     "type": "boolean"
                 },
+                "max_pages": {
+                    "type": "integer",
+                    "maximum": 50,
+                    "minimum": 1
+                },
                 "name": {
                     "type": "string"
                 },
@@ -1014,6 +1018,11 @@
                 "enabled": {
                     "type": "boolean"
                 },
+                "max_pages": {
+                    "type": "integer",
+                    "maximum": 50,
+                    "minimum": 1
+                },
                 "name": {
                     "type": "string",
                     "minLength": 1
@@ -1108,6 +1117,9 @@
                 },
                 "last_scraped": {
                     "type": "string"
+                },
+                "max_pages": {
+                    "type": "integer"
                 },
                 "name": {
                     "type": "string"

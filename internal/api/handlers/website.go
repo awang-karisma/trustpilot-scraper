@@ -90,6 +90,12 @@ func (h *WebsiteHandler) Create(c fiber.Ctx) error {
 		BaseURL:  req.BaseURL,
 		Schedule: req.Schedule,
 		Enabled:  req.Enabled,
+		MaxPages: req.MaxPages,
+	}
+
+	// Set default MaxPages if not provided
+	if website.MaxPages <= 0 {
+		website.MaxPages = 1
 	}
 
 	result := h.db.Create(&website)
@@ -147,6 +153,13 @@ func (h *WebsiteHandler) Update(c fiber.Ctx) error {
 	}
 	if req.Enabled != nil {
 		website.Enabled = *req.Enabled
+	}
+	if req.MaxPages != nil {
+		website.MaxPages = *req.MaxPages
+		// Ensure MaxPages is at least 1
+		if website.MaxPages <= 0 {
+			website.MaxPages = 1
+		}
 	}
 
 	result = h.db.Save(&website)
