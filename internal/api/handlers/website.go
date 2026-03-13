@@ -7,6 +7,7 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/awang-karisma/trustpilot-scraper/internal/api/dto"
+	"github.com/awang-karisma/trustpilot-scraper/internal/config"
 	"github.com/awang-karisma/trustpilot-scraper/internal/database"
 	"github.com/awang-karisma/trustpilot-scraper/internal/scheduler"
 )
@@ -15,13 +16,15 @@ import (
 type WebsiteHandler struct {
 	db        *gorm.DB
 	scheduler *scheduler.Scheduler
+	config    *config.ServiceConfig
 }
 
 // NewWebsiteHandler creates a new WebsiteHandler
-func NewWebsiteHandler(db *gorm.DB, sched *scheduler.Scheduler) *WebsiteHandler {
+func NewWebsiteHandler(db *gorm.DB, sched *scheduler.Scheduler, cfg *config.ServiceConfig) *WebsiteHandler {
 	return &WebsiteHandler{
 		db:        db,
 		scheduler: sched,
+		config:    cfg,
 	}
 }
 
@@ -85,10 +88,16 @@ func (h *WebsiteHandler) Create(c fiber.Ctx) error {
 		return c.Status(400).JSON(dto.ErrorResponse{Error: "invalid request body"})
 	}
 
+	// Use default schedule if not provided
+	schedule := req.Schedule
+	if schedule == "" {
+		schedule = h.config.DefaultSchedule
+	}
+
 	website := database.Website{
 		Name:     req.Name,
 		BaseURL:  req.BaseURL,
-		Schedule: req.Schedule,
+		Schedule: schedule,
 		Enabled:  req.Enabled,
 		MaxPages: req.MaxPages,
 	}

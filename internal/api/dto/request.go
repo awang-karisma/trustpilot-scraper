@@ -7,7 +7,7 @@ import "time"
 type CreateWebsiteRequest struct {
 	Name     string `json:"name" validate:"required"`
 	BaseURL  string `json:"base_url" validate:"required,url"`
-	Schedule string `json:"schedule" validate:"required"`
+	Schedule string `json:"schedule" validate:"omitempty"`
 	Enabled  bool   `json:"enabled"`
 	MaxPages int    `json:"max_pages" validate:"omitempty,min=1,max=50"`
 }

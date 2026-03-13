@@ -78,7 +78,7 @@ func (s *Server) registerRoutes() {
 	}
 
 	// Website routes
-	websiteHandler := handlers.NewWebsiteHandler(s.db, s.scheduler)
+	websiteHandler := handlers.NewWebsiteHandler(s.db, s.scheduler, s.config)
 	api.Get("/websites", websiteHandler.List)
 	api.Post("/websites", websiteHandler.Create)
 	api.Get("/websites/:id", websiteHandler.Get)
