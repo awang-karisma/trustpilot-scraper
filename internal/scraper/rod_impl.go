@@ -361,54 +361,22 @@ func (r *Scraper) ScrapeWithContext(ctx context.Context, url string) (*ScrapeRes
 	return result, nil
 }
 
-// connectToChrome attempts to connect to Chrome using multiple methods
+// connectToChrome attempts to connect to Chrome using rod launcher manager
 func (r *Scraper) connectToChrome() (*rod.Browser, error) {
-	// Method 1: Try managed launcher URL from config
-	if r.config.LauncherManagerURL != "" {
-		log.Printf("Attempting to connect to Rod launcher manager: %s", r.config.LauncherManagerURL)
-		l := launcher.MustNewManaged(r.config.LauncherManagerURL)
-		// You can set any launcher flags here if needed
-		// l.Headless(r.config.Headless)
-		// l.Set("window-size", fmt.Sprintf("%d,%d", r.config.WindowWidth, r.config.WindowHeight))
-
-		browser := rod.New().Client(l.MustClient()).MustConnect()
-		log.Println("Successfully connected to Rod launcher manager")
-		return browser, nil
+	if r.config.LauncherManagerURL == "" {
+		return nil, fmt.Errorf("rod launcher manager URL not configured (CHROME_LAUNCHER_MANAGER_URL)")
 	}
 
-	// Method 2: Try remote Chrome URL from config
-	if r.config.RemoteURL != "" {
-		log.Printf("Attempting to connect to remote Chrome: %s", r.config.RemoteURL)
-		browser := rod.New().ControlURL(r.config.RemoteURL)
-		connErr := browser.Connect()
-		if connErr == nil {
-			log.Println("Successfully connected to remote Chrome")
-			return browser, nil
-		}
-		log.Printf("Failed to connect to remote Chrome: %v", connErr)
+	log.Printf("Attempting to connect to Rod launcher manager: %s", r.config.LauncherManagerURL)
+	l := launcher.MustNewManaged(r.config.LauncherManagerURL)
+
+	browser := rod.New().Client(l.MustClient())
+	if err := browser.Connect(); err != nil {
+		return nil, fmt.Errorf("failed to connect to rod launcher manager at %s: %w", r.config.LauncherManagerURL, err)
 	}
 
-	// Method 3: Try default remote Chrome
-	log.Println("Attempting to connect to default remote Chrome (ws://localhost:9222)")
-	browser := rod.New().ControlURL("ws://localhost:9222")
-	connErr := browser.Connect()
-	if connErr == nil {
-		log.Println("Successfully connected to default remote Chrome")
-		return browser, nil
-	}
-	log.Printf("Failed to connect to default remote Chrome: %v", connErr)
-
-	// Method 4: Try local Chrome
-	log.Println("Attempting to launch local Chrome")
-	browser = rod.New()
-	connErr = browser.Connect()
-	if connErr == nil {
-		log.Println("Successfully launched local Chrome")
-		return browser, nil
-	}
-	log.Printf("Failed to launch local Chrome: %v", connErr)
-
-	return nil, fmt.Errorf("no Chrome browser found or could not be launched")
+	log.Println("Successfully connected to Rod launcher manager")
+	return browser, nil
 }
 
 // Helper functions
