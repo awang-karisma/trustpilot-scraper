@@ -120,3 +120,11 @@ const (
 	NotificationJobStatusSent    = "sent"
 	NotificationJobStatusFailed  = "failed"
 )
+
+// SentReview tracks which reviews have been sent for each notification channel
+type SentReview struct {
+	ID        uint      `gorm:"primaryKey" json:"id"`
+	ChannelID string    `gorm:"index;not null" json:"channel_id"`
+	ReviewID  uint      `gorm:"index;not null" json:"review_id"`
+	SentAt    time.Time `json:"sent_at"`
+}

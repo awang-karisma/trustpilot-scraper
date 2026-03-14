@@ -34,6 +34,7 @@ func (m *InitManager) DropAllTables() error {
 		&Template{},
 		&NotificationChannel{},
 		&NotificationJob{},
+		&SentReview{},
 	}
 
 	for _, table := range tables {
@@ -60,6 +61,7 @@ func (m *InitManager) AutoMigrate() error {
 		&Template{},
 		&NotificationChannel{},
 		&NotificationJob{},
+		&SentReview{},
 	}
 
 	for _, table := range tables {

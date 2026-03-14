@@ -111,31 +111,42 @@ func (w *NotificationWorker) processJob(ctx context.Context, job *queue.Job) {
 		return
 	}
 
-	// Fetch latest reviews for the website
-	var reviews []database.Review
-	if err := w.db.Where("website_id = ?", channel.WebsiteID).
-		Order("date DESC").
-		Limit(10).
-		Find(&reviews).Error; err != nil {
-		w.failJob(job, fmt.Sprintf("Failed to fetch reviews: %v", err))
+	// Fetch unsent review for the website
+	review, err := w.getUnsentReview(channel.Website.ID, channel.ID)
+	if err != nil {
+		w.failJob(job, fmt.Sprintf("Failed to fetch unsent review: %v", err))
+		return
+	}
+
+	if review == nil {
+		// No new reviews to send
+		w.logger.Info("No new reviews to send", "job_id", job.ID, "channel_id", job.ChannelID)
+		w.saveJobResult(job.ChannelID, database.NotificationJobStatusSent, nil)
+		if err := w.q.Ack(job.ID); err != nil {
+			w.logger.Error("Failed to acknowledge job", "job_id", job.ID, "error", err)
+		}
 		return
 	}
 
 	// Get latest rating
 	var rating database.WebsiteRating
-	if err := w.db.Where("website_id = ?", channel.WebsiteID).
+	if err := w.db.Where("website_id = ?", channel.Website.ID).
 		Order("created_at DESC").
 		First(&rating).Error; err != nil {
 		w.failJob(job, fmt.Sprintf("Failed to fetch rating: %v", err))
 		return
 	}
 
-	// Send webhook for each review
-	for _, review := range reviews {
-		if err := w.sendWebhook(channel.WebhookURL, templatePath, channel.Website, review, rating); err != nil {
-			w.failJob(job, fmt.Sprintf("Failed to send webhook: %v", err))
-			return
-		}
+	// Send webhook for the review
+	if err := w.sendWebhook(channel.WebhookURL, templatePath, channel.Website, *review, rating); err != nil {
+		w.failJob(job, fmt.Sprintf("Failed to send webhook: %v", err))
+		return
+	}
+
+	// Mark review as sent
+	if err := w.markReviewAsSent(channel.ID, review.ID); err != nil {
+		w.logger.Error("Failed to mark review as sent", "review_id", review.ID, "error", err)
+		// Don't fail the job if marking fails, notification was already sent
 	}
 
 	// Log successful job
@@ -146,7 +157,48 @@ func (w *NotificationWorker) processJob(ctx context.Context, job *queue.Job) {
 		w.logger.Error("Failed to acknowledge job", "job_id", job.ID, "error", err)
 	}
 
-	w.logger.Info("Notification job completed", "job_id", job.ID, "channel_id", job.ChannelID, "reviews_sent", len(reviews), "duration", time.Since(startTime))
+	w.logger.Info("Notification job completed", "job_id", job.ID, "channel_id", job.ChannelID, "review_id", review.ID, "duration", time.Since(startTime))
+}
+
+// getUnsentReview fetches the latest review that hasn't been sent for this channel
+func (w *NotificationWorker) getUnsentReview(websiteID uint, channelID string) (*database.Review, error) {
+	var review database.Review
+
+	// Query for reviews that are NOT in sent_reviews for this channel
+	err := w.db.Raw(`
+		SELECT r.*
+		FROM reviews r
+		WHERE r.website_id = ?
+		AND r.id NOT IN (
+			SELECT review_id
+			FROM sent_reviews
+			WHERE channel_id = ?
+		)
+		ORDER BY r.date DESC
+		LIMIT 1
+	`, websiteID, channelID).Scan(&review).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	// Return nil if no review found (not an error)
+	if review.ID == 0 {
+		return nil, nil
+	}
+
+	return &review, nil
+}
+
+// markReviewAsSent records that a review has been sent for a channel
+func (w *NotificationWorker) markReviewAsSent(channelID string, reviewID uint) error {
+	sentReview := database.SentReview{
+		ChannelID: channelID,
+		ReviewID:  reviewID,
+		SentAt:    time.Now(),
+	}
+
+	return w.db.Create(&sentReview).Error
 }
 
 // getTemplatePath resolves the template path with fallback
