@@ -44,9 +44,6 @@ COPY --from=builder /app/scripts/entrypoint.sh /app/entrypoint.sh
 # Make entrypoint executable
 RUN chmod +x /app/entrypoint.sh
 
-# Initialize log file
-RUN touch /var/log/cron.log
-
 # Set environment variables for defaults
 ENV DATABASE_URL=postgres://postgres:postgres@db:5432/trustpilot?sslmode=disable
 ENV WEBHOOK_TEMPLATE_PATH=/app/templates/discord.json

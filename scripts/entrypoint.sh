@@ -21,19 +21,14 @@ else
   SERVICE_PID=""
 fi
 
-# Start cron daemon
-crond -l 2
-
 # Run scraper once on startup
 echo "Running initial scrape..."
 /app/scraper
 
-# Keep container alive
-touch /var/log/cron.log
-
-# If service is running, wait for it; otherwise just tail logs
+# Wait for service to keep container alive
 if [ -n "$SERVICE_PID" ]; then
   wait $SERVICE_PID
 else
-  tail -f /var/log/cron.log
+  echo "No service running, exiting..."
+  exit 1
 fi
