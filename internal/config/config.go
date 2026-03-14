@@ -9,11 +9,8 @@ import (
 
 // Config holds configuration for the CLI scraper
 type Config struct {
-	TrustpilotURL   string `mapstructure:"TRUSTPILOT_URL"`
-	DatabaseURL     string `mapstructure:"DATABASE_URL"`
-	WebhookURL      string `mapstructure:"WEBHOOK_URL"`
-	WebhookType     string `mapstructure:"WEBHOOK_TYPE"` // discord, slack, or custom
-	WebhookTemplate string `mapstructure:"WEBHOOK_TEMPLATE_PATH"`
+	TrustpilotURL string `mapstructure:"TRUSTPILOT_URL"`
+	DatabaseURL   string `mapstructure:"DATABASE_URL"`
 }
 
 // ServiceConfig holds configuration for the always-running service
@@ -35,14 +32,15 @@ type ServiceConfig struct {
 	QueueSize        int `mapstructure:"QUEUE_SIZE"`     // default: 100
 	ScrapeTimeoutSec int `mapstructure:"SCRAPE_TIMEOUT"` // seconds, default: 120
 
+	// Parallel Scraping
+	MaxParallelPages int `mapstructure:"MAX_PARALLEL_PAGES"` // default: 50
+
 	// Retry
 	MaxRetries      int `mapstructure:"MAX_RETRIES"`   // default: 3
 	RetryBackoffSec int `mapstructure:"RETRY_BACKOFF"` // seconds, default: 5
 
-	// Webhook (optional)
-	WebhookURL      string `mapstructure:"WEBHOOK_URL"`
-	WebhookType     string `mapstructure:"WEBHOOK_TYPE"`
-	WebhookTemplate string `mapstructure:"WEBHOOK_TEMPLATE_PATH"`
+	// Template Configuration
+	TemplateDir string `mapstructure:"TEMPLATE_DIR"` // e.g., "/app/templates"
 
 	// API
 	APIEnabled bool   `mapstructure:"API_ENABLED"` // default: true
@@ -115,12 +113,12 @@ func LoadServiceConfig() (*ServiceConfig, error) {
 	viper.SetDefault("SCRAPE_TIMEOUT", 120)
 	viper.SetDefault("MAX_RETRIES", 3)
 	viper.SetDefault("RETRY_BACKOFF", 5)
-	viper.SetDefault("WEBHOOK_TYPE", "custom")
-	viper.SetDefault("WEBHOOK_TEMPLATE_PATH", "/app/templates/discord.json")
+	viper.SetDefault("TEMPLATE_DIR", "/app/templates")
 	viper.SetDefault("API_ENABLED", true)
 	viper.SetDefault("API_PORT", 8080)
 	viper.SetDefault("API_HOST", "0.0.0.0")
 	viper.SetDefault("SHUTDOWN_TIMEOUT", 30)
+	viper.SetDefault("MAX_PARALLEL_PAGES", 50)
 
 	// Bind env vars
 	viper.BindEnv("TRUSTPILOT_URL")
@@ -132,13 +130,12 @@ func LoadServiceConfig() (*ServiceConfig, error) {
 	viper.BindEnv("SCRAPE_TIMEOUT")
 	viper.BindEnv("MAX_RETRIES")
 	viper.BindEnv("RETRY_BACKOFF")
-	viper.BindEnv("WEBHOOK_URL")
-	viper.BindEnv("WEBHOOK_TYPE")
-	viper.BindEnv("WEBHOOK_TEMPLATE_PATH")
+	viper.BindEnv("TEMPLATE_DIR")
 	viper.BindEnv("API_ENABLED")
 	viper.BindEnv("API_PORT")
 	viper.BindEnv("API_HOST")
 	viper.BindEnv("SHUTDOWN_TIMEOUT")
+	viper.BindEnv("MAX_PARALLEL_PAGES")
 
 	var cfg ServiceConfig
 	if err := viper.Unmarshal(&cfg); err != nil {

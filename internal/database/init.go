@@ -31,6 +31,9 @@ func (m *InitManager) DropAllTables() error {
 		&WebsiteRating{},
 		&ScrapeJob{},
 		&Summary{},
+		&Template{},
+		&NotificationChannel{},
+		&NotificationJob{},
 	}
 
 	for _, table := range tables {
@@ -54,6 +57,9 @@ func (m *InitManager) AutoMigrate() error {
 		&WebsiteRating{},
 		&ScrapeJob{},
 		&Summary{},
+		&Template{},
+		&NotificationChannel{},
+		&NotificationJob{},
 	}
 
 	for _, table := range tables {

@@ -31,24 +31,48 @@ type ReviewListQuery struct {
 	Search    string `query:"search"`
 }
 
-// Webhook requests
-
-type WebhookTriggerRequest struct {
-	ReviewID uint `json:"review_id,omitempty"` // Optional: specific review to send
-}
-
-type WebhookTestRequest struct {
-	WebhookURL   string `json:"webhook_url" validate:"required,url"`
-	WebhookType  string `json:"webhook_type"`
-	TemplatePath string `json:"template_path"`
-}
-
 // Job requests
 
 type JobListQuery struct {
 	Status    string `query:"status" validate:"omitempty,oneof=pending running completed failed"`
 	WebsiteID uint   `query:"website_id"`
 	Limit     int    `query:"limit" validate:"min=1,max=100"`
+}
+
+// Template requests
+
+type CreateTemplateRequest struct {
+	Name        string `json:"name" validate:"required"`
+	FileName    string `json:"file_name" validate:"required"`
+	Description string `json:"description"`
+	Enabled     bool   `json:"enabled"`
+}
+
+type UpdateTemplateRequest struct {
+	Name        *string `json:"name,omitempty" validate:"omitempty,min=1"`
+	FileName    *string `json:"file_name,omitempty" validate:"omitempty,min=1"`
+	Description *string `json:"description,omitempty"`
+	Enabled     *bool   `json:"enabled,omitempty"`
+}
+
+// Notification requests
+
+type CreateNotificationRequest struct {
+	Name       string `json:"name" validate:"required"`
+	Schedule   string `json:"schedule" validate:"required"`
+	WebsiteID  string `json:"website_id" validate:"required"`
+	TemplateID string `json:"template_id" validate:"required"`
+	WebhookURL string `json:"webhook_url" validate:"required,url"`
+	Enabled    bool   `json:"enabled"`
+}
+
+type UpdateNotificationRequest struct {
+	Name       *string `json:"name,omitempty" validate:"omitempty,min=1"`
+	Schedule   *string `json:"schedule,omitempty" validate:"omitempty"`
+	WebsiteID  *string `json:"website_id,omitempty" validate:"omitempty"`
+	TemplateID *string `json:"template_id,omitempty" validate:"omitempty,min=1"`
+	WebhookURL *string `json:"webhook_url,omitempty" validate:"omitempty,url"`
+	Enabled    *bool   `json:"enabled,omitempty"`
 }
 
 // Rating requests

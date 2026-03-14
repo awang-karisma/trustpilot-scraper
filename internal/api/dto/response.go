@@ -138,20 +138,6 @@ type RatingHistoryResponse struct {
 	History     []RatingSnapshot `json:"history"`
 }
 
-// Webhook responses
-
-type WebhookTriggerResponse struct {
-	Success bool      `json:"success"`
-	Message string    `json:"message"`
-	SentAt  time.Time `json:"sent_at,omitempty"`
-}
-
-type WebhookTestResponse struct {
-	Success        bool   `json:"success"`
-	Message        string `json:"message"`
-	ResponseStatus int    `json:"response_status,omitempty"`
-}
-
 // Job responses
 
 type JobResponse struct {
@@ -194,6 +180,128 @@ func ToJobListResponse(jobs []database.ScrapeJob, total int64) JobListResponse {
 		data[i] = ToJobResponse(j)
 	}
 	return JobListResponse{Data: data, Total: total}
+}
+
+// Template responses
+
+type TemplateResponse struct {
+	ID          string    `json:"id"`
+	Name        string    `json:"name"`
+	FileName    string    `json:"file_name"`
+	Description string    `json:"description,omitempty"`
+	Enabled     bool      `json:"enabled"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
+}
+
+type TemplateListResponse struct {
+	Data  []TemplateResponse `json:"data"`
+	Total int64              `json:"total"`
+}
+
+func ToTemplateResponse(t database.Template) TemplateResponse {
+	return TemplateResponse{
+		ID:          t.ID,
+		Name:        t.Name,
+		FileName:    t.FileName,
+		Description: t.Description,
+		Enabled:     t.Enabled,
+		CreatedAt:   t.CreatedAt,
+		UpdatedAt:   t.UpdatedAt,
+	}
+}
+
+func ToTemplateListResponse(templates []database.Template, total int64) TemplateListResponse {
+	data := make([]TemplateResponse, len(templates))
+	for i, t := range templates {
+		data[i] = ToTemplateResponse(t)
+	}
+	return TemplateListResponse{Data: data, Total: total}
+}
+
+// Notification responses
+
+type NotificationResponse struct {
+	ID           string    `json:"id"`
+	Name         string    `json:"name"`
+	Schedule     string    `json:"schedule"`
+	WebsiteID    string    `json:"website_id"`
+	WebsiteName  string    `json:"website_name,omitempty"`
+	TemplateID   string    `json:"template_id"`
+	TemplateName string    `json:"template_name,omitempty"`
+	WebhookURL   string    `json:"webhook_url"`
+	Enabled      bool      `json:"enabled"`
+	CreatedAt    time.Time `json:"created_at"`
+	UpdatedAt    time.Time `json:"updated_at"`
+}
+
+type NotificationListResponse struct {
+	Data  []NotificationResponse `json:"data"`
+	Total int64                  `json:"total"`
+}
+
+func ToNotificationResponse(n database.NotificationChannel) NotificationResponse {
+	response := NotificationResponse{
+		ID:         n.ID,
+		Name:       n.Name,
+		Schedule:   n.Schedule,
+		WebsiteID:  n.WebsiteID,
+		TemplateID: n.TemplateID,
+		WebhookURL: n.WebhookURL,
+		Enabled:    n.Enabled,
+		CreatedAt:  n.CreatedAt,
+		UpdatedAt:  n.UpdatedAt,
+	}
+	if n.Website != nil {
+		response.WebsiteName = n.Website.Name
+	}
+	if n.Template != nil {
+		response.TemplateName = n.Template.Name
+	}
+	return response
+}
+
+func ToNotificationListResponse(channels []database.NotificationChannel, total int64) NotificationListResponse {
+	data := make([]NotificationResponse, len(channels))
+	for i, n := range channels {
+		data[i] = ToNotificationResponse(n)
+	}
+	return NotificationListResponse{Data: data, Total: total}
+}
+
+// NotificationJob responses
+
+type NotificationJobResponse struct {
+	ID        string     `json:"id"`
+	ChannelID string     `json:"channel_id"`
+	Status    string     `json:"status"`
+	SentAt    *time.Time `json:"sent_at,omitempty"`
+	Error     string     `json:"error,omitempty"`
+	CreatedAt time.Time  `json:"created_at"`
+}
+
+type NotificationJobListResponse struct {
+	Data  []NotificationJobResponse `json:"data"`
+	Total int64                     `json:"total"`
+}
+
+func ToNotificationJobResponse(j database.NotificationJob) NotificationJobResponse {
+	return NotificationJobResponse{
+		ID:        j.ID,
+		ChannelID: j.ChannelID,
+		Status:    j.Status,
+		SentAt:    j.SentAt,
+		Error:     j.Error,
+		CreatedAt: j.CreatedAt,
+	}
+}
+
+func ToNotificationJobListResponse(jobs []database.NotificationJob, total int64) NotificationJobListResponse {
+	data := make([]NotificationJobResponse, len(jobs))
+	for i, j := range jobs {
+		data[i] = ToNotificationJobResponse(j)
+	}
+	return NotificationJobListResponse{Data: data, Total: total}
 }
 
 // Stats responses

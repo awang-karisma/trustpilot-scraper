@@ -8,8 +8,10 @@ import (
 // Job represents a scrape job in the queue
 type Job struct {
 	ID          string    `json:"id"`
+	Type        string    `json:"type"` // "scrape" or "notification"
 	WebsiteID   uint      `json:"website_id"`
-	Priority    int       `json:"priority"` // Higher = more urgent
+	ChannelID   string    `json:"channel_id"` // For notification jobs
+	Priority    int       `json:"priority"`   // Higher = more urgent
 	Attempts    int       `json:"attempts"`
 	MaxAttempts int       `json:"max_attempts"`
 	CreatedAt   time.Time `json:"created_at"`

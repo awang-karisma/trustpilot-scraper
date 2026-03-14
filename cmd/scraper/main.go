@@ -4,9 +4,7 @@ import (
 	"github.com/awang-karisma/trustpilot-scraper/internal/config"
 	"github.com/awang-karisma/trustpilot-scraper/internal/database"
 	"github.com/awang-karisma/trustpilot-scraper/internal/scraper"
-	"github.com/awang-karisma/trustpilot-scraper/internal/webhook"
 	"log"
-	"strings"
 	"time"
 )
 
@@ -65,28 +63,6 @@ func main() {
 	err = db.Where("date >= ?", startOfDay).Order("rating ASC, date DESC").First(&worstReview).Error
 	if err != nil {
 		log.Printf("No reviews found for today yet: %v", err)
-		// We still send a success webhook but with empty review data if desired,
-		// or we can just use a placeholder.
-	}
-
-	// 8. Send Success Webhook
-	if cfg.WebhookURL != "" {
-		// Extract website name from URL
-		website := cfg.TrustpilotURL
-		parts := strings.Split(cfg.TrustpilotURL, "/")
-		if len(parts) > 0 {
-			website = parts[len(parts)-1]
-		}
-
-		webhookSvc := webhook.NewWebhookService(cfg.WebhookURL, cfg.WebhookTemplate)
-		log.Printf("Sending success run webhook with worst review of the day: %s", worstReview.ReviewID)
-		if err := webhookSvc.Send(website, worstReview, result.Summary); err != nil {
-			log.Printf("Failed to send success webhook: %v", err)
-		} else {
-			log.Printf("Success webhook sent successfully")
-		}
-	} else {
-		log.Println("Webhook URL is not configured, skipping success notification")
 	}
 
 	log.Println("Scraping completed successfully")

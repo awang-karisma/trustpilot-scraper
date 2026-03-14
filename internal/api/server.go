@@ -16,7 +16,6 @@ import (
 	"github.com/awang-karisma/trustpilot-scraper/internal/api/handlers"
 	"github.com/awang-karisma/trustpilot-scraper/internal/config"
 	"github.com/awang-karisma/trustpilot-scraper/internal/scheduler"
-	"github.com/awang-karisma/trustpilot-scraper/internal/webhook"
 )
 
 // Server represents the API server
@@ -71,12 +70,6 @@ func (s *Server) registerRoutes() {
 	// API routes
 	api := s.app.Group("/api")
 
-	// Create webhook service
-	var webhookService *webhook.WebhookService
-	if s.config.WebhookURL != "" {
-		webhookService = webhook.NewWebhookService(s.config.WebhookURL, s.config.WebhookTemplate)
-	}
-
 	// Website routes
 	websiteHandler := handlers.NewWebsiteHandler(s.db, s.scheduler, s.config)
 	api.Get("/websites", websiteHandler.List)
@@ -96,10 +89,24 @@ func (s *Server) registerRoutes() {
 	ratingHandler := handlers.NewRatingHandler(s.db)
 	api.Get("/websites/:id/ratings", ratingHandler.GetHistory)
 
-	// Webhook routes
-	webhookHandler := handlers.NewWebhookHandler(s.db, webhookService)
-	api.Post("/websites/:id/webhook", webhookHandler.Trigger)
-	api.Post("/webhook/test", webhookHandler.Test)
+	// Template routes
+	templateHandler := handlers.NewTemplateHandler(s.db)
+	api.Get("/templates", templateHandler.List)
+	api.Post("/templates", templateHandler.Create)
+	api.Get("/templates/:id", templateHandler.Get)
+	api.Put("/templates/:id", templateHandler.Update)
+	api.Delete("/templates/:id", templateHandler.Delete)
+	api.Post("/templates/:id/validate", templateHandler.Validate)
+
+	// Notification routes
+	notificationHandler := handlers.NewNotificationHandler(s.db, s.scheduler, s.config)
+	api.Get("/notifications", notificationHandler.List)
+	api.Post("/notifications", notificationHandler.Create)
+	api.Get("/notifications/:id", notificationHandler.Get)
+	api.Put("/notifications/:id", notificationHandler.Update)
+	api.Delete("/notifications/:id", notificationHandler.Delete)
+	api.Post("/notifications/:id/trigger", notificationHandler.Trigger)
+	api.Get("/notifications/:id/jobs", notificationHandler.ListJobs)
 
 	// Job routes
 	jobHandler := handlers.NewJobHandler(s.db)

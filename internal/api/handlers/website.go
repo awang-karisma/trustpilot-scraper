@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"strconv"
 
 	"github.com/gofiber/fiber/v3"
@@ -107,6 +108,13 @@ func (h *WebsiteHandler) Create(c fiber.Ctx) error {
 		website.MaxPages = 1
 	}
 
+	// Validate MaxPages against config limit
+	if website.MaxPages > h.config.MaxParallelPages {
+		return c.Status(400).JSON(dto.ErrorResponse{
+			Error: fmt.Sprintf("max_pages cannot exceed %d", h.config.MaxParallelPages),
+		})
+	}
+
 	result := h.db.Create(&website)
 	if result.Error != nil {
 		return c.Status(500).JSON(dto.ErrorResponse{Error: result.Error.Error()})
@@ -168,6 +176,12 @@ func (h *WebsiteHandler) Update(c fiber.Ctx) error {
 		// Ensure MaxPages is at least 1
 		if website.MaxPages <= 0 {
 			website.MaxPages = 1
+		}
+		// Validate MaxPages against config limit
+		if website.MaxPages > h.config.MaxParallelPages {
+			return c.Status(400).JSON(dto.ErrorResponse{
+				Error: fmt.Sprintf("max_pages cannot exceed %d", h.config.MaxParallelPages),
+			})
 		}
 	}
 

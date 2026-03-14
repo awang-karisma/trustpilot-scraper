@@ -10,7 +10,6 @@ import (
 
 	"github.com/awang-karisma/trustpilot-scraper/internal/config"
 	"github.com/awang-karisma/trustpilot-scraper/internal/queue"
-	"github.com/awang-karisma/trustpilot-scraper/internal/webhook"
 )
 
 // Pool manages a pool of workers
@@ -19,7 +18,6 @@ type Pool struct {
 	queue      queue.Queue
 	db         *gorm.DB
 	config     *config.ServiceConfig
-	webhook    *webhook.WebhookService
 	logger     *slog.Logger
 	ctx        context.Context
 	cancel     context.CancelFunc
@@ -28,13 +26,12 @@ type Pool struct {
 }
 
 // NewPool creates a new worker pool
-func NewPool(db *gorm.DB, q queue.Queue, cfg *config.ServiceConfig, wh *webhook.WebhookService, logger *slog.Logger) *Pool {
+func NewPool(db *gorm.DB, q queue.Queue, cfg *config.ServiceConfig, logger *slog.Logger) *Pool {
 	return &Pool{
-		db:      db,
-		queue:   q,
-		config:  cfg,
-		webhook: wh,
-		logger:  logger,
+		db:     db,
+		queue:  q,
+		config: cfg,
+		logger: logger,
 	}
 }
 
@@ -45,7 +42,7 @@ func (p *Pool) Start() {
 	// Create workers
 	p.workers = make([]*Worker, p.config.WorkerCount)
 	for i := 0; i < p.config.WorkerCount; i++ {
-		p.workers[i] = NewWorker(i+1, p.db, p.queue, p.config, p.webhook, p.logger)
+		p.workers[i] = NewWorker(i+1, p.db, p.queue, p.config, p.logger)
 	}
 
 	// Start workers

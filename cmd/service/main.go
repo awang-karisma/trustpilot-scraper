@@ -14,7 +14,6 @@ import (
 	"github.com/awang-karisma/trustpilot-scraper/internal/database"
 	"github.com/awang-karisma/trustpilot-scraper/internal/queue"
 	"github.com/awang-karisma/trustpilot-scraper/internal/scheduler"
-	"github.com/awang-karisma/trustpilot-scraper/internal/webhook"
 	"github.com/awang-karisma/trustpilot-scraper/internal/website"
 	"github.com/awang-karisma/trustpilot-scraper/internal/worker"
 
@@ -92,18 +91,11 @@ func main() {
 	q := queue.NewMemoryQueue()
 	logger.Info("Queue initialized", "queue_size", cfg.QueueSize)
 
-	// 4. Create webhook service (optional)
-	var webhookService *webhook.WebhookService
-	if cfg.WebhookURL != "" {
-		webhookService = webhook.NewWebhookService(cfg.WebhookURL, cfg.WebhookTemplate)
-		logger.Info("Webhook service configured", "url", cfg.WebhookURL)
-	}
-
-	// 5. Create scheduler
+	// 6. Create scheduler
 	sched := scheduler.NewScheduler(db, q, cfg, logger)
 
-	// 6. Create worker pool
-	pool := worker.NewPool(db, q, cfg, webhookService, logger)
+	// 7. Create worker pool
+	pool := worker.NewPool(db, q, cfg, logger)
 
 	// 7. Create API server
 	server := api.NewServer(cfg, db, sched, logger)

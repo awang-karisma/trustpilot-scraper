@@ -15,7 +15,6 @@ import (
 	"github.com/awang-karisma/trustpilot-scraper/internal/database"
 	"github.com/awang-karisma/trustpilot-scraper/internal/queue"
 	"github.com/awang-karisma/trustpilot-scraper/internal/scraper"
-	"github.com/awang-karisma/trustpilot-scraper/internal/webhook"
 )
 
 // Worker processes scrape jobs from the queue
@@ -25,19 +24,17 @@ type Worker struct {
 	queue   queue.Queue
 	config  *config.ServiceConfig
 	scraper *scraper.Scraper
-	webhook *webhook.WebhookService
 	logger  *slog.Logger
 }
 
 // NewWorker creates a new worker
-func NewWorker(id int, db *gorm.DB, q queue.Queue, cfg *config.ServiceConfig, wh *webhook.WebhookService, logger *slog.Logger) *Worker {
+func NewWorker(id int, db *gorm.DB, q queue.Queue, cfg *config.ServiceConfig, logger *slog.Logger) *Worker {
 	return &Worker{
 		id:      id,
 		db:      db,
 		queue:   q,
 		config:  cfg,
 		scraper: scraper.NewScraper(""), // Initialize scraper here
-		webhook: wh,
 		logger:  logger.With("worker_id", id),
 	}
 }

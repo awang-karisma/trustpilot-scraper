@@ -16,23 +16,25 @@ import (
 
 // Scheduler manages cron-based job scheduling for websites
 type Scheduler struct {
-	db      *gorm.DB
-	queue   queue.Queue
-	cron    *cron.Cron
-	config  *config.ServiceConfig
-	logger  *slog.Logger
-	entries map[uint]cron.EntryID // website ID -> cron entry ID
-	mu      sync.RWMutex
+	db                  *gorm.DB
+	queue               queue.Queue
+	cron                *cron.Cron
+	config              *config.ServiceConfig
+	logger              *slog.Logger
+	entries             map[uint]cron.EntryID   // website ID -> cron entry ID
+	notificationEntries map[string]cron.EntryID // channel ID -> cron entry ID
+	mu                  sync.RWMutex
 }
 
 // NewScheduler creates a new scheduler
 func NewScheduler(db *gorm.DB, q queue.Queue, cfg *config.ServiceConfig, logger *slog.Logger) *Scheduler {
 	return &Scheduler{
-		db:      db,
-		queue:   q,
-		config:  cfg,
-		logger:  logger,
-		entries: make(map[uint]cron.EntryID),
+		db:                  db,
+		queue:               q,
+		config:              cfg,
+		logger:              logger,
+		entries:             make(map[uint]cron.EntryID),
+		notificationEntries: make(map[string]cron.EntryID),
 		cron: cron.New(cron.WithLocation(time.UTC), cron.WithParser(cron.NewParser(
 			cron.SecondOptional|cron.Minute|cron.Hour|cron.Dom|cron.Month|cron.Dow,
 		))),
@@ -76,10 +78,22 @@ func (s *Scheduler) Start() error {
 		}
 	}
 
+	// Load all enabled notification channels and schedule them
+	var channels []database.NotificationChannel
+	if err := s.db.Where("enabled = ?", true).Find(&channels).Error; err != nil {
+		s.logger.Error("Failed to load notification channels", "error", err)
+	} else {
+		for _, channel := range channels {
+			if err := s.ScheduleNotificationChannel(channel); err != nil {
+				s.logger.Error("Failed to schedule notification channel", "channel_id", channel.ID, "error", err)
+			}
+		}
+	}
+
 	// Start cron
 	s.cron.Start()
 
-	s.logger.Info("Scheduler started", "websites_scheduled", len(websites))
+	s.logger.Info("Scheduler started", "websites_scheduled", len(websites), "channels_scheduled", len(channels))
 	return nil
 }
 
@@ -193,9 +207,110 @@ func (s *Scheduler) Reload() error {
 	for _, entryID := range s.entries {
 		s.cron.Remove(entryID)
 	}
+	for _, entryID := range s.notificationEntries {
+		s.cron.Remove(entryID)
+	}
 	s.entries = make(map[uint]cron.EntryID)
+	s.notificationEntries = make(map[string]cron.EntryID)
 	s.mu.Unlock()
 
 	// Reload from database
 	return s.Start()
+}
+
+// LoadNotificationChannels loads all enabled notification channels from database
+func (s *Scheduler) LoadNotificationChannels() error {
+	var channels []database.NotificationChannel
+	if err := s.db.Where("enabled = ?", true).Find(&channels).Error; err != nil {
+		s.logger.Error("Failed to load notification channels", "error", err)
+		return err
+	}
+
+	s.logger.Info("Loading notification channels", "count", len(channels))
+
+	for _, channel := range channels {
+		if err := s.ScheduleNotificationChannel(channel); err != nil {
+			s.logger.Error("Failed to schedule notification channel", "channel_id", channel.ID, "error", err)
+		}
+	}
+
+	return nil
+}
+
+// ScheduleNotificationChannel schedules a notification channel
+func (s *Scheduler) ScheduleNotificationChannel(channel database.NotificationChannel) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	// Remove existing schedule if any
+	if entryID, exists := s.notificationEntries[channel.ID]; exists {
+		s.cron.Remove(entryID)
+		delete(s.notificationEntries, channel.ID)
+	}
+
+	// Skip if not enabled
+	if !channel.Enabled {
+		s.logger.Debug("Notification channel disabled, skipping schedule", "channel_id", channel.ID, "name", channel.Name)
+		return nil
+	}
+
+	// Add new schedule
+	entryID, err := s.cron.AddFunc(channel.Schedule, func() {
+		s.enqueueNotificationJob(channel.ID, queue.PriorityNormal)
+	})
+	if err != nil {
+		s.logger.Error("Failed to schedule notification channel", "channel_id", channel.ID, "schedule", channel.Schedule, "error", err)
+		return err
+	}
+
+	s.notificationEntries[channel.ID] = entryID
+	s.logger.Info("Notification channel scheduled", "channel_id", channel.ID, "name", channel.Name, "schedule", channel.Schedule)
+
+	return nil
+}
+
+// UnscheduleNotificationChannel removes a notification channel from scheduler
+func (s *Scheduler) UnscheduleNotificationChannel(channelID string) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	if entryID, exists := s.notificationEntries[channelID]; exists {
+		s.cron.Remove(entryID)
+		delete(s.notificationEntries, channelID)
+		s.logger.Info("Notification channel unscheduled", "channel_id", channelID)
+	}
+}
+
+// TriggerNotificationImmediate triggers an immediate notification job
+func (s *Scheduler) TriggerNotificationImmediate(channelID string) error {
+	return s.enqueueNotificationJob(channelID, queue.PriorityHigh)
+}
+
+// enqueueNotificationJob creates and enqueues a notification job
+func (s *Scheduler) enqueueNotificationJob(channelID string, priority int) error {
+	// Get channel
+	var channel database.NotificationChannel
+	if err := s.db.First(&channel, "id = ?", channelID).Error; err != nil {
+		s.logger.Error("Failed to get notification channel for job", "channel_id", channelID, "error", err)
+		return err
+	}
+
+	// Create job
+	job := queue.Job{
+		Type:        "notification",
+		ChannelID:   channelID,
+		Priority:    priority,
+		MaxAttempts: s.config.MaxRetries,
+		CreatedAt:   time.Now(),
+		ScheduledAt: time.Now(),
+	}
+
+	// Enqueue
+	if err := s.queue.Enqueue(job); err != nil {
+		s.logger.Error("Failed to enqueue notification job", "channel_id", channelID, "error", err)
+		return err
+	}
+
+	s.logger.Info("Notification job enqueued", "channel_id", channelID, "name", channel.Name, "priority", priority)
+	return nil
 }
