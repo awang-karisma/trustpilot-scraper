@@ -90,7 +90,7 @@ func (s *Server) registerRoutes() {
 	api.Get("/websites/:id/ratings", ratingHandler.GetHistory)
 
 	// Template routes
-	templateHandler := handlers.NewTemplateHandler(s.db)
+	templateHandler := handlers.NewTemplateHandler(s.db, s.config.TemplateDir)
 	api.Get("/templates", templateHandler.List)
 	api.Post("/templates", templateHandler.Create)
 	api.Get("/templates/:id", templateHandler.Get)

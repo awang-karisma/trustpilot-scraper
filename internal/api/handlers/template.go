@@ -1,6 +1,9 @@
 package handlers
 
 import (
+	"os"
+	"path/filepath"
+
 	"github.com/gofiber/fiber/v3"
 	"gorm.io/gorm"
 
@@ -10,12 +13,16 @@ import (
 
 // TemplateHandler handles template-related requests
 type TemplateHandler struct {
-	db *gorm.DB
+	db          *gorm.DB
+	templateDir string
 }
 
 // NewTemplateHandler creates a new TemplateHandler
-func NewTemplateHandler(db *gorm.DB) *TemplateHandler {
-	return &TemplateHandler{db: db}
+func NewTemplateHandler(db *gorm.DB, templateDir string) *TemplateHandler {
+	return &TemplateHandler{
+		db:          db,
+		templateDir: templateDir,
+	}
 }
 
 // List returns all templates
@@ -76,6 +83,12 @@ func (h *TemplateHandler) Create(c fiber.Ctx) error {
 	var req dto.CreateTemplateRequest
 	if err := c.Bind().JSON(&req); err != nil {
 		return c.Status(400).JSON(dto.ErrorResponse{Error: "invalid request body"})
+	}
+
+	// Validate that the template file exists
+	templatePath := filepath.Join(h.templateDir, req.FileName)
+	if _, err := os.Stat(templatePath); os.IsNotExist(err) {
+		return c.Status(400).JSON(dto.ErrorResponse{Error: "template file not found"})
 	}
 
 	template := database.Template{

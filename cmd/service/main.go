@@ -94,19 +94,21 @@ func main() {
 	// 6. Create scheduler
 	sched := scheduler.NewScheduler(db, q, cfg, logger)
 
-	// 7. Create worker pool
-	pool := worker.NewPool(db, q, cfg, logger)
+	// 7. Create worker pools
+	scrapePool := worker.NewPool(db, q, cfg, logger)
+	notificationPool := worker.NewNotificationPool(db, q, cfg, logger)
 
-	// 7. Create API server
+	// 8. Create API server
 	server := api.NewServer(cfg, db, sched, logger)
 
 	// Setup graceful shutdown
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer cancel()
 
-	// 8. Start components
-	// Start worker pool first (consumers)
-	pool.Start()
+	// 9. Start components
+	// Start worker pools first (consumers)
+	scrapePool.Start()
+	notificationPool.Start()
 
 	// Start scheduler (producer)
 	if err := sched.Start(); err != nil {
@@ -190,9 +192,12 @@ func main() {
 		logger.Error("Failed to stop scheduler", "error", err)
 	}
 
-	// Stop worker pool
-	if err := pool.Stop(); err != nil {
-		logger.Error("Failed to stop worker pool", "error", err)
+	// Stop worker pools
+	if err := scrapePool.Stop(); err != nil {
+		logger.Error("Failed to stop scrape worker pool", "error", err)
+	}
+	if err := notificationPool.Stop(); err != nil {
+		logger.Error("Failed to stop notification worker pool", "error", err)
 	}
 
 	// Close queue
