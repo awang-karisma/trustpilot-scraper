@@ -1,5 +1,40 @@
 basePath: /
 definitions:
+  github_com_awang-karisma_trustpilot-scraper_internal_api_dto.CreateNotificationRequest:
+    properties:
+      enabled:
+        type: boolean
+      name:
+        type: string
+      schedule:
+        type: string
+      template_id:
+        type: string
+      webhook_url:
+        type: string
+      website_id:
+        type: string
+    required:
+    - name
+    - schedule
+    - template_id
+    - webhook_url
+    - website_id
+    type: object
+  github_com_awang-karisma_trustpilot-scraper_internal_api_dto.CreateTemplateRequest:
+    properties:
+      description:
+        type: string
+      enabled:
+        type: boolean
+      file_name:
+        type: string
+      name:
+        type: string
+    required:
+    - file_name
+    - name
+    type: object
   github_com_awang-karisma_trustpilot-scraper_internal_api_dto.CreateWebsiteRequest:
     properties:
       base_url:
@@ -17,7 +52,6 @@ definitions:
     required:
     - base_url
     - name
-    - schedule
     type: object
   github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ErrorResponse:
     properties:
@@ -64,6 +98,64 @@ definitions:
         type: integer
       running:
         type: integer
+    type: object
+  github_com_awang-karisma_trustpilot-scraper_internal_api_dto.NotificationJobListResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.NotificationJobResponse'
+        type: array
+      total:
+        type: integer
+    type: object
+  github_com_awang-karisma_trustpilot-scraper_internal_api_dto.NotificationJobResponse:
+    properties:
+      channel_id:
+        type: string
+      created_at:
+        type: string
+      error:
+        type: string
+      id:
+        type: string
+      sent_at:
+        type: string
+      status:
+        type: string
+    type: object
+  github_com_awang-karisma_trustpilot-scraper_internal_api_dto.NotificationListResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.NotificationResponse'
+        type: array
+      total:
+        type: integer
+    type: object
+  github_com_awang-karisma_trustpilot-scraper_internal_api_dto.NotificationResponse:
+    properties:
+      created_at:
+        type: string
+      enabled:
+        type: boolean
+      id:
+        type: string
+      name:
+        type: string
+      schedule:
+        type: string
+      template_id:
+        type: string
+      template_name:
+        type: string
+      updated_at:
+        type: string
+      webhook_url:
+        type: string
+      website_id:
+        type: string
+      website_name:
+        type: string
     type: object
   github_com_awang-karisma_trustpilot-scraper_internal_api_dto.Pagination:
     properties:
@@ -165,6 +257,62 @@ definitions:
       success:
         type: boolean
     type: object
+  github_com_awang-karisma_trustpilot-scraper_internal_api_dto.TemplateListResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.TemplateResponse'
+        type: array
+      total:
+        type: integer
+    type: object
+  github_com_awang-karisma_trustpilot-scraper_internal_api_dto.TemplateResponse:
+    properties:
+      created_at:
+        type: string
+      description:
+        type: string
+      enabled:
+        type: boolean
+      file_name:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  github_com_awang-karisma_trustpilot-scraper_internal_api_dto.UpdateNotificationRequest:
+    properties:
+      enabled:
+        type: boolean
+      name:
+        minLength: 1
+        type: string
+      schedule:
+        type: string
+      template_id:
+        minLength: 1
+        type: string
+      webhook_url:
+        type: string
+      website_id:
+        type: string
+    type: object
+  github_com_awang-karisma_trustpilot-scraper_internal_api_dto.UpdateTemplateRequest:
+    properties:
+      description:
+        type: string
+      enabled:
+        type: boolean
+      file_name:
+        minLength: 1
+        type: string
+      name:
+        minLength: 1
+        type: string
+    type: object
   github_com_awang-karisma_trustpilot-scraper_internal_api_dto.UpdateWebsiteRequest:
     properties:
       base_url:
@@ -180,41 +328,6 @@ definitions:
         type: string
       schedule:
         type: string
-    type: object
-  github_com_awang-karisma_trustpilot-scraper_internal_api_dto.WebhookTestRequest:
-    properties:
-      template_path:
-        type: string
-      webhook_type:
-        type: string
-      webhook_url:
-        type: string
-    required:
-    - webhook_url
-    type: object
-  github_com_awang-karisma_trustpilot-scraper_internal_api_dto.WebhookTestResponse:
-    properties:
-      message:
-        type: string
-      response_status:
-        type: integer
-      success:
-        type: boolean
-    type: object
-  github_com_awang-karisma_trustpilot-scraper_internal_api_dto.WebhookTriggerRequest:
-    properties:
-      review_id:
-        description: 'Optional: specific review to send'
-        type: integer
-    type: object
-  github_com_awang-karisma_trustpilot-scraper_internal_api_dto.WebhookTriggerResponse:
-    properties:
-      message:
-        type: string
-      sent_at:
-        type: string
-      success:
-        type: boolean
     type: object
   github_com_awang-karisma_trustpilot-scraper_internal_api_dto.WebsiteListResponse:
     properties:
@@ -333,6 +446,225 @@ paths:
       summary: Get a job
       tags:
       - jobs
+  /api/notifications:
+    get:
+      description: Get a list of all notification channels
+      parameters:
+      - description: Filter by enabled status
+        in: query
+        name: enabled
+        type: boolean
+      - description: Filter by website ID
+        in: query
+        name: website_id
+        type: string
+      - default: 50
+        description: Number of results
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.NotificationListResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ErrorResponse'
+      summary: List notification channels
+      tags:
+      - notifications
+    post:
+      consumes:
+      - application/json
+      description: Register a new notification channel
+      parameters:
+      - description: Notification channel details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.CreateNotificationRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.NotificationResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ErrorResponse'
+      summary: Create a new notification channel
+      tags:
+      - notifications
+  /api/notifications/{id}:
+    delete:
+      description: Delete a notification channel by ID
+      parameters:
+      - description: Notification Channel ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ErrorResponse'
+      summary: Delete a notification channel
+      tags:
+      - notifications
+    get:
+      description: Get a notification channel by ID
+      parameters:
+      - description: Notification Channel ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.NotificationResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ErrorResponse'
+      summary: Get a notification channel
+      tags:
+      - notifications
+    put:
+      consumes:
+      - application/json
+      description: Update notification channel details by ID
+      parameters:
+      - description: Notification Channel ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Notification channel details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.UpdateNotificationRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.NotificationResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ErrorResponse'
+      summary: Update a notification channel
+      tags:
+      - notifications
+  /api/notifications/{id}/jobs:
+    get:
+      description: Get notification jobs for a specific channel
+      parameters:
+      - description: Notification Channel ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Filter by status (pending, sent, failed)
+        in: query
+        name: status
+        type: string
+      - default: 50
+        description: Number of results
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.NotificationJobListResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ErrorResponse'
+      summary: List notification jobs
+      tags:
+      - notifications
+  /api/notifications/{id}/trigger:
+    post:
+      description: Manually trigger an immediate notification for a channel
+      parameters:
+      - description: Notification Channel ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ErrorResponse'
+      summary: Trigger a notification
+      tags:
+      - notifications
   /api/reviews:
     get:
       description: Get paginated reviews with optional filters
@@ -427,25 +759,41 @@ paths:
       summary: Get service statistics
       tags:
       - stats
-  /api/webhook/test:
-    post:
-      consumes:
-      - application/json
-      description: Test a webhook configuration with mock data
-      parameters:
-      - description: Webhook test configuration
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.WebhookTestRequest'
+  /api/templates:
+    get:
+      description: Get a list of all notification templates
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.WebhookTestResponse'
+            $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.TemplateListResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ErrorResponse'
+      summary: List all templates
+      tags:
+      - templates
+    post:
+      consumes:
+      - application/json
+      description: Register a new notification template
+      parameters:
+      - description: Template details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.CreateTemplateRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.TemplateResponse'
         "400":
           description: Bad Request
           schema:
@@ -454,9 +802,132 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ErrorResponse'
-      summary: Test a webhook
+      summary: Create a new template
       tags:
-      - webhooks
+      - templates
+  /api/templates/{id}:
+    delete:
+      description: Delete a notification template by ID
+      parameters:
+      - description: Template ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ErrorResponse'
+      summary: Delete a template
+      tags:
+      - templates
+    get:
+      description: Get a notification template by ID
+      parameters:
+      - description: Template ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.TemplateResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ErrorResponse'
+      summary: Get a template
+      tags:
+      - templates
+    put:
+      consumes:
+      - application/json
+      description: Update notification template details by ID
+      parameters:
+      - description: Template ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Template details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.UpdateTemplateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.TemplateResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ErrorResponse'
+      summary: Update a template
+      tags:
+      - templates
+  /api/templates/{id}/validate:
+    post:
+      description: Check if a template file exists and is valid
+      parameters:
+      - description: Template ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ErrorResponse'
+      summary: Validate a template
+      tags:
+      - templates
   /api/websites:
     get:
       description: Get a list of all registered websites to scrape
@@ -724,38 +1195,4 @@ paths:
       summary: Trigger a scrape
       tags:
       - websites
-  /api/websites/{id}/webhook:
-    post:
-      consumes:
-      - application/json
-      description: Manually trigger a webhook for a specific website
-      parameters:
-      - description: Website ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: Webhook trigger options
-        in: body
-        name: request
-        schema:
-          $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.WebhookTriggerRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.WebhookTriggerResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ErrorResponse'
-      summary: Trigger a webhook
-      tags:
-      - webhooks
 swagger: "2.0"

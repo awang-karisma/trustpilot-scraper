@@ -123,6 +123,336 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/notifications": {
+            "get": {
+                "description": "Get a list of all notification channels",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "notifications"
+                ],
+                "summary": "List notification channels",
+                "parameters": [
+                    {
+                        "type": "boolean",
+                        "description": "Filter by enabled status",
+                        "name": "enabled",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by website ID",
+                        "name": "website_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 50,
+                        "description": "Number of results",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.NotificationListResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Register a new notification channel",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "notifications"
+                ],
+                "summary": "Create a new notification channel",
+                "parameters": [
+                    {
+                        "description": "Notification channel details",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.CreateNotificationRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.NotificationResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/notifications/{id}": {
+            "get": {
+                "description": "Get a notification channel by ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "notifications"
+                ],
+                "summary": "Get a notification channel",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Notification Channel ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.NotificationResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update notification channel details by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "notifications"
+                ],
+                "summary": "Update a notification channel",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Notification Channel ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Notification channel details",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.UpdateNotificationRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.NotificationResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete a notification channel by ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "notifications"
+                ],
+                "summary": "Delete a notification channel",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Notification Channel ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.SuccessResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/notifications/{id}/jobs": {
+            "get": {
+                "description": "Get notification jobs for a specific channel",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "notifications"
+                ],
+                "summary": "List notification jobs",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Notification Channel ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by status (pending, sent, failed)",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 50,
+                        "description": "Number of results",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.NotificationJobListResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/notifications/{id}/trigger": {
+            "post": {
+                "description": "Manually trigger an immediate notification for a channel",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "notifications"
+                ],
+                "summary": "Trigger a notification",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Notification Channel ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/reviews": {
             "get": {
                 "description": "Get paginated reviews with optional filters",
@@ -263,9 +593,33 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/webhook/test": {
+        "/api/templates": {
+            "get": {
+                "description": "Get a list of all notification templates",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "templates"
+                ],
+                "summary": "List all templates",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.TemplateListResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ErrorResponse"
+                        }
+                    }
+                }
+            },
             "post": {
-                "description": "Test a webhook configuration with mock data",
+                "description": "Register a new notification template",
                 "consumes": [
                     "application/json"
                 ],
@@ -273,17 +627,109 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "webhooks"
+                    "templates"
                 ],
-                "summary": "Test a webhook",
+                "summary": "Create a new template",
                 "parameters": [
                     {
-                        "description": "Webhook test configuration",
+                        "description": "Template details",
                         "name": "request",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.WebhookTestRequest"
+                            "$ref": "#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.CreateTemplateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.TemplateResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/templates/{id}": {
+            "get": {
+                "description": "Get a notification template by ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "templates"
+                ],
+                "summary": "Get a template",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Template ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.TemplateResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update notification template details by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "templates"
+                ],
+                "summary": "Update a template",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Template ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Template details",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.UpdateTemplateRequest"
                         }
                     }
                 ],
@@ -291,11 +737,104 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.WebhookTestResponse"
+                            "$ref": "#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.TemplateResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete a notification template by ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "templates"
+                ],
+                "summary": "Delete a template",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Template ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.SuccessResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/templates/{id}/validate": {
+            "post": {
+                "description": "Check if a template file exists and is valid",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "templates"
+                ],
+                "summary": "Validate a template",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Template ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
                         "schema": {
                             "$ref": "#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ErrorResponse"
                         }
@@ -709,67 +1248,65 @@ const docTemplate = `{
                     }
                 }
             }
-        },
-        "/api/websites/{id}/webhook": {
-            "post": {
-                "description": "Manually trigger a webhook for a specific website",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "webhooks"
-                ],
-                "summary": "Trigger a webhook",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Website ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Webhook trigger options",
-                        "name": "request",
-                        "in": "body",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.WebhookTriggerRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.WebhookTriggerResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.ErrorResponse"
-                        }
-                    }
-                }
-            }
         }
     },
     "definitions": {
+        "github_com_awang-karisma_trustpilot-scraper_internal_api_dto.CreateNotificationRequest": {
+            "type": "object",
+            "required": [
+                "name",
+                "schedule",
+                "template_id",
+                "webhook_url",
+                "website_id"
+            ],
+            "properties": {
+                "enabled": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "schedule": {
+                    "type": "string"
+                },
+                "template_id": {
+                    "type": "string"
+                },
+                "webhook_url": {
+                    "type": "string"
+                },
+                "website_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_awang-karisma_trustpilot-scraper_internal_api_dto.CreateTemplateRequest": {
+            "type": "object",
+            "required": [
+                "file_name",
+                "name"
+            ],
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "file_name": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
         "github_com_awang-karisma_trustpilot-scraper_internal_api_dto.CreateWebsiteRequest": {
             "type": "object",
             "required": [
                 "base_url",
-                "name",
-                "schedule"
+                "name"
             ],
             "properties": {
                 "base_url": {
@@ -859,6 +1396,95 @@ const docTemplate = `{
                 },
                 "running": {
                     "type": "integer"
+                }
+            }
+        },
+        "github_com_awang-karisma_trustpilot-scraper_internal_api_dto.NotificationJobListResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.NotificationJobResponse"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "github_com_awang-karisma_trustpilot-scraper_internal_api_dto.NotificationJobResponse": {
+            "type": "object",
+            "properties": {
+                "channel_id": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "error": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "sent_at": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_awang-karisma_trustpilot-scraper_internal_api_dto.NotificationListResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.NotificationResponse"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "github_com_awang-karisma_trustpilot-scraper_internal_api_dto.NotificationResponse": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "schedule": {
+                    "type": "string"
+                },
+                "template_id": {
+                    "type": "string"
+                },
+                "template_name": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "webhook_url": {
+                    "type": "string"
+                },
+                "website_id": {
+                    "type": "string"
+                },
+                "website_name": {
+                    "type": "string"
                 }
             }
         },
@@ -1016,6 +1642,90 @@ const docTemplate = `{
                 }
             }
         },
+        "github_com_awang-karisma_trustpilot-scraper_internal_api_dto.TemplateListResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/github_com_awang-karisma_trustpilot-scraper_internal_api_dto.TemplateResponse"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "github_com_awang-karisma_trustpilot-scraper_internal_api_dto.TemplateResponse": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "file_name": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_awang-karisma_trustpilot-scraper_internal_api_dto.UpdateNotificationRequest": {
+            "type": "object",
+            "properties": {
+                "enabled": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "schedule": {
+                    "type": "string"
+                },
+                "template_id": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "webhook_url": {
+                    "type": "string"
+                },
+                "website_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_awang-karisma_trustpilot-scraper_internal_api_dto.UpdateTemplateRequest": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "file_name": {
+                    "type": "string",
+                    "minLength": 1
+                },
+                "name": {
+                    "type": "string",
+                    "minLength": 1
+                }
+            }
+        },
         "github_com_awang-karisma_trustpilot-scraper_internal_api_dto.UpdateWebsiteRequest": {
             "type": "object",
             "properties": {
@@ -1036,60 +1746,6 @@ const docTemplate = `{
                 },
                 "schedule": {
                     "type": "string"
-                }
-            }
-        },
-        "github_com_awang-karisma_trustpilot-scraper_internal_api_dto.WebhookTestRequest": {
-            "type": "object",
-            "required": [
-                "webhook_url"
-            ],
-            "properties": {
-                "template_path": {
-                    "type": "string"
-                },
-                "webhook_type": {
-                    "type": "string"
-                },
-                "webhook_url": {
-                    "type": "string"
-                }
-            }
-        },
-        "github_com_awang-karisma_trustpilot-scraper_internal_api_dto.WebhookTestResponse": {
-            "type": "object",
-            "properties": {
-                "message": {
-                    "type": "string"
-                },
-                "response_status": {
-                    "type": "integer"
-                },
-                "success": {
-                    "type": "boolean"
-                }
-            }
-        },
-        "github_com_awang-karisma_trustpilot-scraper_internal_api_dto.WebhookTriggerRequest": {
-            "type": "object",
-            "properties": {
-                "review_id": {
-                    "description": "Optional: specific review to send",
-                    "type": "integer"
-                }
-            }
-        },
-        "github_com_awang-karisma_trustpilot-scraper_internal_api_dto.WebhookTriggerResponse": {
-            "type": "object",
-            "properties": {
-                "message": {
-                    "type": "string"
-                },
-                "sent_at": {
-                    "type": "string"
-                },
-                "success": {
-                    "type": "boolean"
                 }
             }
         },
