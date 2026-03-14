@@ -249,23 +249,35 @@ func (w *NotificationWorker) sendWebhook(webhookURL, templatePath string, websit
 	tmplName := filepath.Base(templatePath)
 
 	data := struct {
-		Website     string
-		Reviewer    string
-		Title       string
-		Content     string
-		Rating      int
-		TotalRating float64
-		TotalCount  int
-		Date        string
+		Website       string
+		Reviewer      string
+		Title         string
+		Content       string
+		Rating        int
+		TotalRating   float64
+		TotalCount    int
+		Date          string
+		DateISO       string
+		ReviewID      string
+		ReviewDate    string
+		ReviewURL     string
+		UnixTimestamp int64
+		NowISO        string
 	}{
-		Website:     website.Name,
-		Reviewer:    review.Reviewer,
-		Title:       review.Title,
-		Content:     review.Content,
-		Rating:      review.Rating,
-		TotalRating: rating.Rating,
-		TotalCount:  rating.Count,
-		Date:        review.Date.Format("2006-01-02 15:04:05"),
+		Website:       website.Name,
+		Reviewer:      review.Reviewer,
+		Title:         review.Title,
+		Content:       review.Content,
+		Rating:        review.Rating,
+		TotalRating:   rating.Rating,
+		TotalCount:    rating.Count,
+		Date:          review.Date.UTC().Format("2006-01-02 15:04:05"),
+		DateISO:       review.Date.UTC().Format(time.RFC3339),
+		ReviewID:      review.ReviewID,
+		ReviewDate:    review.Date.UTC().Format("2006-01-02 15:04:05"),
+		ReviewURL:     fmt.Sprintf("https://www.trustpilot.com/reviews/%s", review.ReviewID),
+		UnixTimestamp: review.Date.Unix(),
+		NowISO:        time.Now().UTC().Format(time.RFC3339),
 	}
 
 	var buf bytes.Buffer

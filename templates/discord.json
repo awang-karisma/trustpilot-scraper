@@ -1,9 +1,7 @@
 {
-  "content": "✅ **Trustpilot Scraper Success Run**",
   "embeds": [
     {
-      "title": "{{.Website | json}} - {{.TotalRating}} / 5",
-      "description": "Total Reviews: {{.TotalCount}}\n\n**Worst Review of the Day:**\n{{if .Reviewer}}*{{.Title | json}}*\\n{{.Content | json}}{{else}}No reviews found for today yet.{{end}}",
+      "title": "{{.Website | json}}",
       "color": 3447003,
       "fields": [
         {
@@ -12,19 +10,40 @@
           "inline": true
         },
         {
-          "name": "Rating",
-          "value": "{{if .Reviewer}}{{.Rating}} / 5{{else}}N/A{{end}}",
+          "name": "User Rating",
+          "value": "{{if .Reviewer}}⭐ {{.Rating}} / 5{{else}}N/A{{end}}",
           "inline": true
         },
         {
-          "name": "Date",
-          "value": "{{if .Reviewer}}{{.Date}}{{else}}N/A{{end}}",
+          "name": "Overall Rating",
+          "value": "{{if .Reviewer}}⭐ {{.TotalRating}} / 5{{else}}N/A{{end}}",
           "inline": true
+        },
+        {
+          "name": "Title",
+          "value": "{{if .Reviewer}}{{.Title | json}}{{else}}N/A{{end}}",
+          "inline": true
+        },
+        {
+          "name": "Review Date",
+          "value": "{{if .Reviewer}}<t:{{.UnixTimestamp}}:F>\n<t:{{.UnixTimestamp}}:R>{{else}}N/A{{end}}",
+          "inline": true
+        },
+        {
+          "name": "Content",
+          "value": "{{if .Reviewer}}{{.Content | json}}{{else}}N/A{{end}}",
+          "inline": false
+        },
+        {
+          "name": "Review URL",
+          "value": "{{if .Reviewer}}{{.ReviewURL}}{{else}}N/A{{end}}",
+          "inline": false
         }
       ],
       "footer": {
-        "text": "Scraper run completed successfully"
-      }
+        "text": "Good Riddance"
+      },
+      "timestamp": "{{.NowISO}}"
     }
   ]
 }
